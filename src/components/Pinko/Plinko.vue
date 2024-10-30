@@ -59,8 +59,6 @@
   import { onMounted, ref } from "vue";
   import Matter from "matter-js";
   
-  console.clear();
-  
   const width = 620;
   const height = 534;
   
