@@ -1,29 +1,48 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+// import { RouterLink, RouterView } from 'vue-router'
+// import HelloWorld from './components/HelloWorld.vue'
+import Plinko from './components/Pinko/Plinko.vue';
+import Sidebar from './components/Sidebar.vue';
+import Balance from './components/Balance.vue';
+import logo from './assets/logo.svg';
 </script>
 
 <template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
+  <div class="relative flex min-h-dvh w-full flex-col">
+    <nav class="sticky top-0 z-10 w-full bg-gray-700 px-5 drop-shadow-lg">
+      <div class="mx-auto flex h-14 max-w-7xl items-center justify-between">
+        <img :src="logo" alt="logo" class="h-6 sm:h-7" />
+        <div class="mx-auto">
+          <Balance />
+        </div>
+      </div>
+    </nav>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+    <div class="flex-1 px-5">
+      <div class="mx-auto mt-5 min-w-[300px] max-w-xl drop-shadow-xl md:mt-10 lg:max-w-7xl">
+        <div class="flex flex-col-reverse overflow-hidden rounded-lg lg:w-full lg:flex-row">
+          <Sidebar />
+          <div class="flex-1">
+            <Plinko />
+          </div>
+        </div>
+      </div>
     </div>
-  </header>
 
-  <RouterView />
+    <!-- <SettingsWindow />
+    <LiveStatsWindow /> -->
+
+    <footer class="px-5 pb-4 pt-16">
+      <div class="mx-auto max-w-[40rem]">
+        <div aria-hidden="true" class="h-[1px] bg-slate-700" />
+        <div class="flex items-center justify-center p-2">
+          <p class="text-sm text-slate-500">
+            © 2024
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
 </template>
 
 <style scoped>

@@ -1,6 +1,6 @@
-import { LOCAL_STORAGE_KEY } from '$lib/constants/game';
-import { balance } from '$lib/stores/game';
-import { get } from 'svelte/store';
+import { LOCAL_STORAGE_KEY } from '@/constants/game';
+// import { balance } from '@/stores/game';
+// import { get } from 'svelte/store';
 
 export function setBalanceFromLocalStorage() {
   const balanceVal = window.localStorage.getItem(LOCAL_STORAGE_KEY.BALANCE);

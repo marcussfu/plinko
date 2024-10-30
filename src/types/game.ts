@@ -1,5 +1,5 @@
-import type { RowCount } from '$lib/constants/game';
-export type { RowCount } from '$lib/constants/game';
+import type { RowCount } from '../constants/game';
+export type { RowCount } from '../constants/game';
 
 export enum BetMode {
   MANUAL = 'MANUAL',

@@ -1,4 +1,4 @@
-import type { RowCount } from '$lib/types';
+import type { RowCount } from '../types';
 
 type RgbColor = { r: number; g: number; b: number };
 
@@ -40,8 +40,8 @@ export function getBinColors(rowCount: RowCount) {
     ).map(({ r, g, b }) => `rgb(${r}, ${g}, ${b})`);
 
     return {
-      background: [...redToYellowBg, ...redToYellowBg.toReversed().slice(isBinsEven ? 0 : 1)],
-      shadow: [...redToYellowShadow, ...redToYellowShadow.toReversed().slice(isBinsEven ? 0 : 1)],
+      background: [...redToYellowBg, ...redToYellowBg.reverse().slice(isBinsEven ? 0 : 1)],
+      shadow: [...redToYellowShadow, ...redToYellowShadow.reverse().slice(isBinsEven ? 0 : 1)],
     };
   }
 }
