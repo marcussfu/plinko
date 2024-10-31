@@ -25,6 +25,14 @@ export const useGameStore = defineStore('game', () => {
 
    const winRecords : Ref<WinRecord[]> = ref([]);
 
+   const autoDropEnabled : Ref<boolean> = ref(false);
+
+   const isDropBall = ref<boolean>(false);
+
+   const setDropBall = (value: boolean) => {
+    isDropBall.value = value;
+  }
+
 /**
  * History of total profits. Should be updated whenever a new win record is pushed
  * to `winRecords` store.
@@ -77,5 +85,7 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
   return probabilities;
 });
 
-  return { plinkoEngine, betAmount, betAmountOfExistingBalls, rowCount, riskLevel, winRecords, totalProfitHistory, balance, binColors, binProbabilities }
+  return { plinkoEngine, betAmount, betAmountOfExistingBalls, rowCount, riskLevel, winRecords, totalProfitHistory, balance, binColors, binProbabilities,
+    isDropBall, setDropBall
+   }
 })

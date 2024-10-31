@@ -48,6 +48,9 @@
 import { ref } from 'vue';
 import { BetMode, RiskLevel } from '../types';
 import { autoBetIntervalMs, rowCountOptions } from '../constants/game';
+import { useGameStore } from '../stores/game';
+
+const game = useGameStore();
 
 const betMode: BetMode = BetMode.MANUAL;
 
@@ -57,6 +60,7 @@ const riskLevel = ref(BetMode.MANUAL);
 const handleBetClick = () => {
     if (betMode === BetMode.MANUAL) {
         console.log("Drop Ball");
+        game.setDropBall(true);
     //   $plinkoEngine?.dropBall();
     } 
     // else if (autoBetInterval === null) {
@@ -67,6 +71,22 @@ const handleBetClick = () => {
     //   resetAutoBetInterval();
     // }
 };
+
+// let autoDropEnabled = false;
+//     let autoDroppingInterval = null;
+//     dropButton.addEventListener("click", () => {
+//       if (autoDropEnabled && autoDroppingInterval) {
+//         dropButton.innerHTML = "Start";
+//         clearInterval(autoDroppingInterval);
+//         autoDroppingInterval = null;
+//       } else if (autoDropEnabled && !autoDroppingInterval) {
+//         dropButton.innerHTML = "Stop";
+//         dropABall();
+//         autoDroppingInterval = setInterval(dropABall, 600);
+//       } else if (!autoDropEnabled) {
+//         dropABall();
+//       }
+//     });
 
 const betModes = [
     { value: BetMode.MANUAL, label: 'Manual' },

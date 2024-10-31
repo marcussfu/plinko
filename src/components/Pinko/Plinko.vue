@@ -1,5 +1,5 @@
 <template>
-    <div class="controls">
+    <!-- <div class="controls">
       <div></div>
       <div>
         <div id="balls">-</div>
@@ -30,7 +30,7 @@
         <div id="multiplier">1</div>
       </div>
       <div></div>
-    </div>
+    </div> -->
     <div class="canvas-container">
       <canvas id="canvas"></canvas>
     </div>
@@ -56,91 +56,75 @@
   </template>
   
   <script setup>
-  import { onMounted, ref } from "vue";
+  import { onMounted, ref, watch } from "vue";
+  import { useGameStore } from '../../stores/game';
   import Matter from "matter-js";
-  
+
+  const game = useGameStore();
   const width = 620;
   const height = 534;
   
   const multipliers = [50, 20, 7, 4, 3, 1, 1, 0, 0, 0, 1, 1, 3, 4, 7, 20, 50];
-  onMounted(() => {
-    multipliers.forEach((m, i) => {
-      console.log(document.getElementById(`note-${i}`));
-      document.getElementById(`note-${i}`).innerHTML = m;
-    });
-  
-    let balls = 10;
-    const ballsEl = document.getElementById("balls");
-  
-    // Drop button
-    const dropButton = document.getElementById("drop-button");
-    const autoDropCheckbox = document.getElementById("checkbox");
-    let autoDropEnabled = false;
-    let autoDroppingInterval = null;
-    dropButton.addEventListener("click", () => {
-      if (autoDropEnabled && autoDroppingInterval) {
-        dropButton.innerHTML = "Start";
-        clearInterval(autoDroppingInterval);
-        autoDroppingInterval = null;
-      } else if (autoDropEnabled && !autoDroppingInterval) {
-        dropButton.innerHTML = "Stop";
-        dropABall();
-        autoDroppingInterval = setInterval(dropABall, 600);
-      } else if (!autoDropEnabled) {
-        dropABall();
-      }
-    });
-    autoDropCheckbox.addEventListener("input", (e) => {
-      autoDropEnabled = e.target.checked;
-  
-      if (autoDropEnabled) {
-        dropButton.innerHTML = "Start";
-      } else {
-        dropButton.innerHTML = "Drop";
-      }
-  
-      if (autoDroppingInterval) {
-        clearInterval(autoDroppingInterval);
-        autoDroppingInterval = null;
-      }
-    });
-  
-    // Drop a ball
-    const BALL_RAD = 7;
-    function dropABall() {
-      if (balls > 0) {
-        balls -= 1;
-      }
-      const dropLeft = width / 2 - GAP;
-      const dropRight = width / 2 + GAP;
-      const dropWidth = dropRight - dropLeft;
-      const x = Math.random() * dropWidth + dropLeft;
-      const y = -PEG_RAD;
-  
-      const ball = Bodies.circle(x, y, BALL_RAD, {
-        label: "Ball",
-        restitution: 0.6,
-        render: {
-          fillStyle: "#f23",
-        },
-      });
-      Composite.add(engine.world, [ball]);
-    }
-  
-    // module aliases
-    const Engine = Matter.Engine,
+
+  // module aliases
+  const Engine = Matter.Engine,
       Events = Matter.Events,
       Render = Matter.Render,
       Runner = Matter.Runner,
       Bodies = Matter.Bodies,
       Composite = Matter.Composite;
+
+  // create an engine
+  const engine = Engine.create({
+    gravity: {
+      scale: 0.0007,
+    },
+  });
   
-    // create an engine
-    const engine = Engine.create({
-      gravity: {
-        scale: 0.0007,
-      },
+  const GAP = 32;
+  const PEG_RAD = 4;
+
+  onMounted(() => {
+    multipliers.forEach((m, i) => {
+      // console.log(document.getElementById(`note-${i}`));
+      document.getElementById(`note-${i}`).innerHTML = m;
     });
+  
+    // let balls = 10;
+    // const ballsEl = document.getElementById("balls");
+  
+    // Drop button
+    // const dropButton = document.getElementById("drop-button");
+    // const autoDropCheckbox = document.getElementById("checkbox");
+    // let autoDropEnabled = false;
+    // let autoDroppingInterval = null;
+    // dropButton.addEventListener("click", () => {
+    //   if (autoDropEnabled && autoDroppingInterval) {
+    //     dropButton.innerHTML = "Start";
+    //     clearInterval(autoDroppingInterval);
+    //     autoDroppingInterval = null;
+    //   } else if (autoDropEnabled && !autoDroppingInterval) {
+    //     dropButton.innerHTML = "Stop";
+    //     dropABall();
+    //     autoDroppingInterval = setInterval(dropABall, 600);
+    //   } else if (!autoDropEnabled) {
+    //     dropABall();
+    //   }
+    // });
+    // autoDropCheckbox.addEventListener("input", (e) => {
+    //   autoDropEnabled = e.target.checked;
+  
+    //   if (autoDropEnabled) {
+    //     dropButton.innerHTML = "Start";
+    //   } else {
+    //     dropButton.innerHTML = "Drop";
+    //   }
+  
+    //   if (autoDroppingInterval) {
+    //     clearInterval(autoDroppingInterval);
+    //     autoDroppingInterval = null;
+    //   }
+    // });
   
     // create a renderer
     const canvas = document.getElementById("canvas");
@@ -155,10 +139,8 @@
     });
   
     // Create pegs
-    const GAP = 32;
-    const PEG_RAD = 4;
     const pegs = [];
-    for (let r = 0; r < 16; r++) {
+    for (let r = 0; r < game.rowCount; r++) {
       const pegsInRow = r + 3;
       for (let c = 0; c < pegsInRow; c++) {
         const x = width / 2 + (c - (pegsInRow - 1) / 2) * GAP;
@@ -214,7 +196,7 @@
           if (index >= 0 && index < 17) {
             // Register ball
             const ballsWon = Math.floor(multipliers[index]);
-            balls += ballsWon;
+            // balls += ballsWon;
             // Ball hit note at bottom
             const el = document.getElementById(`note-${index}`);
             if (el.dataset.pressed !== "true") {
@@ -271,16 +253,49 @@
       Engine.update(engine, 1000 / 60);
   
       // Update ball count
-      ballsEl.innerHTML = balls;
+      // ballsEl.innerHTML = balls;
   
       requestAnimationFrame(run);
     }
   
     run();
   });
+
+  // Drop a ball
+  const BALL_RAD = 7;
+  const dropABall = () => {
+    // if (balls > 0) {
+    //   balls -= 1;
+    // }
+    const dropLeft = width / 2 - GAP;
+    const dropRight = width / 2 + GAP;
+    const dropWidth = dropRight - dropLeft;
+    const x = Math.random() * dropWidth + dropLeft;
+    const y = -PEG_RAD;
+
+    const ball = Bodies.circle(x, y, BALL_RAD, {
+      label: "Ball",
+      restitution: 0.6,
+      render: {
+        fillStyle: "#f23",
+      },
+    });
+    Composite.add(engine.world, [ball]);
+  }
+
+  watch(
+    () => game.isDropBall,
+    (newVal) => {
+      console.log("isDropBall changed:", newVal);
+      if (newVal) {
+        dropABall();
+        game.setDropBall(false);  // Reset `isDropBall` after handling
+      }
+    }
+  );
   </script>
   
-  <style>
+  <style scoped>
   html {
     font-family: "Montserrat", sans-serif;
   }
