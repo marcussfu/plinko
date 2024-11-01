@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue';
-import type { Ref } from 'vue';
 import { defineStore } from 'pinia'
-// import PlinkoEngine from '../components/Pinko/PlinkoEngine';
+import PlinkoEngine from '../components/Plinko/PlinkoEngine';
 import { binColor } from '../constants/game';
 import {
   RiskLevel,
@@ -13,20 +12,19 @@ import { interpolateRgbColors } from '../utils/colors';
 import { countValueOccurrences } from '../utils/numbers';
 
 export const useGameStore = defineStore('game', () => {
-   const plinkoEngine  = ref(null)//: Ref<PlinkoEngine | null> = ref(null);
-   
-   const winRecords : Ref<WinRecord[]> = ref([]);
-
-
-
+   const plinkoEngine  = ref<PlinkoEngine | null>(null);
 
    const betAmount = ref<number>(1);
+
+   const betAmountOfExistingBalls = ref<BetAmountOfExistingBalls>({});
 
    const rowCount = ref<RowCount>(16);
 
    const riskLevel = ref<RiskLevel>(RiskLevel.MEDIUM);
 
-   const betAmountOfExistingBalls = ref<BetAmountOfExistingBalls>({});
+   const winRecords = ref<WinRecord[]>([]);
+
+
 
    const isDropBall = ref<boolean>(false);
 
@@ -34,13 +32,15 @@ export const useGameStore = defineStore('game', () => {
     isDropBall.value = value;
    }
 
+
+
 /**
  * History of total profits. Should be updated whenever a new win record is pushed
  * to `winRecords` store.
  *
  * We deliberately don't use `derived(winRecords, ...)` to optimize performance.
  */
- const totalProfitHistory : Ref<number[]> = ref([0]);
+ const totalProfitHistory = ref<number[]>([0]);
 
 /**
  * Game balance, which is saved to local storage.
