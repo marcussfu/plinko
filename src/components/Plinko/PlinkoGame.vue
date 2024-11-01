@@ -169,7 +169,7 @@
   
     function checkCollision(event, label1, label2, callback) {
       event.pairs.forEach(({ bodyA, bodyB }) => {
-        let body1, body2;
+        let body1 = null, body2 = null;
         if (bodyA.label === label1 && bodyB.label === label2) {
           body1 = bodyA;
           body2 = bodyB;
