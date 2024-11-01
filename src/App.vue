@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // import { RouterLink, RouterView } from 'vue-router'
 // import HelloWorld from './components/HelloWorld.vue'
-import Plinko from './components/Pinko/Plinko.vue';
+import Plinko from './components/Plinko/Plinko.vue';
 import Sidebar from './components/Sidebar.vue';
 import Balance from './components/Balance.vue';
 import logo from './assets/logo.svg';

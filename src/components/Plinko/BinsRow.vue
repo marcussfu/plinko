@@ -1,9 +1,9 @@
 <template>
   <!-- Height clamping in mobile: From 10px at 370px viewport width to 16px at 600px viewport width -->
   <div class="flex h-[clamp(10px,0.352px+2.609vw,16px)] w-full justify-center lg:h-7">
-      <div v-if="game.plinkoEngine" class="flex gap-[1%]" :style="{ width: `${(game.plinkoEngine.binsWidthPercentage ?? 0) * 100}%` }" }>
+      <!-- <div v-if="game.plinkoEngine" class="flex gap-[1%]" :style="{ width: `${(game.plinkoEngine.binsWidthPercentage ?? 0) * 100}%` }" }>
         
-      </div>
+      </div> -->
   </div>
 </template>
 
