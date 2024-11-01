@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   // import { plinkoEngine } from '$lib/stores/game';
   // import CircleNotch from 'phosphor-svelte/lib/CircleNotch';
   // import type { Action } from 'svelte/action';
@@ -34,6 +34,6 @@
     <BinsRow />
   </div>
   <div class="absolute right-[5%] top-1/2 -translate-y-1/2">
-    <!-- <LastWins /> -->
+    <LastWins />
   </div>
-</div>
+</div> -->

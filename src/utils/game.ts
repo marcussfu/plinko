@@ -1,15 +1,15 @@
-import { LOCAL_STORAGE_KEY } from '@/constants/game';
-// import { balance } from '@/stores/game';
-// import { get } from 'svelte/store';
+// import { LOCAL_STORAGE_KEY } from '@/constants/game';
+// // import { balance } from '@/stores/game';
+// // import { get } from 'svelte/store';
 
-export function setBalanceFromLocalStorage() {
-  const balanceVal = window.localStorage.getItem(LOCAL_STORAGE_KEY.BALANCE);
-  if (balanceVal) {
-    balance.set(parseFloat(balanceVal));
-  }
-}
+// export function setBalanceFromLocalStorage() {
+//   const balanceVal = window.localStorage.getItem(LOCAL_STORAGE_KEY.BALANCE);
+//   if (balanceVal) {
+//     balance.set(parseFloat(balanceVal));
+//   }
+// }
 
-export function writeBalanceToLocalStorage() {
-  const balanceVal = get(balance).toFixed(2);
-  window.localStorage.setItem(LOCAL_STORAGE_KEY.BALANCE, balanceVal);
-}
+// export function writeBalanceToLocalStorage() {
+//   const balanceVal = get(balance).toFixed(2);
+//   window.localStorage.setItem(LOCAL_STORAGE_KEY.BALANCE, balanceVal);
+// }
