@@ -14,24 +14,25 @@ import { countValueOccurrences } from '../utils/numbers';
 
 export const useGameStore = defineStore('game', () => {
    const plinkoEngine  = ref(null)//: Ref<PlinkoEngine | null> = ref(null);
-
-   const betAmount : Ref<number> = ref(1);
-
-   const betAmountOfExistingBalls : Ref<BetAmountOfExistingBalls> = ref({});
-
-   const rowCount : Ref<RowCount> = ref(16);
-
-   const riskLevel : Ref<RiskLevel> = ref(RiskLevel.MEDIUM);
-
+   
    const winRecords : Ref<WinRecord[]> = ref([]);
 
-   const autoDropEnabled : Ref<boolean> = ref(false);
+
+
+
+   const betAmount = ref<number>(1);
+
+   const rowCount = ref<RowCount>(16);
+
+   const riskLevel = ref<RiskLevel>(RiskLevel.MEDIUM);
+
+   const betAmountOfExistingBalls = ref<BetAmountOfExistingBalls>({});
 
    const isDropBall = ref<boolean>(false);
 
    const setDropBall = (value: boolean) => {
     isDropBall.value = value;
-  }
+   }
 
 /**
  * History of total profits. Should be updated whenever a new win record is pushed
@@ -48,7 +49,7 @@ export const useGameStore = defineStore('game', () => {
  * on every balance change. This prevents unnecessary writes to local storage, which can
  * be slow on low-end devices.
  */
- const balance : Ref<number> = ref(200);
+ const balance = ref<number>(200);
 
 /**
  * RGB colors for every bin. The length of the array is the number of bins.
@@ -85,7 +86,18 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
   return probabilities;
 });
 
-  return { plinkoEngine, betAmount, betAmountOfExistingBalls, rowCount, riskLevel, winRecords, totalProfitHistory, balance, binColors, binProbabilities,
-    isDropBall, setDropBall
+  return { 
+    plinkoEngine, 
+    betAmount, 
+    betAmountOfExistingBalls, 
+    rowCount, 
+    riskLevel, 
+    winRecords, 
+    totalProfitHistory, 
+    balance, 
+    binColors, 
+    binProbabilities,
+    isDropBall,
+    setDropBall
    }
 })

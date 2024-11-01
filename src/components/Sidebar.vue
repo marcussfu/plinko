@@ -2,7 +2,11 @@
     <div class="flex flex-col gap-5 bg-slate-700 p-3 lg:max-w-80 w-[320px] h-[590px]">
         <div class="flex gap-1 rounded-full bg-slate-900 p-1">
             <button v-for="item in betModes" :key="item.label" :value="item.value"
-                class='flex-1 rounded-full py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50 hover:[&:not(:disabled)]:bg-slate-600 active:[&:not(:disabled)]:bg-slate-500'
+                class='flex-1 rounded-full py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50 
+                hover:[&:not(:disabled)]:bg-slate-600 active:[&:not(:disabled)]:bg-slate-500'
+                :class="{ 'bg-slate-600' : betMode === item.value }"
+                @click="betMode = item.value"
+                :disabled="autoBetInterval !== null"
             >
                 {{ item.label }}
             </button>
@@ -13,7 +17,7 @@
 
         <div class="flex flex-col">
             <label for="riskLevel" class="text-sm font-medium text-slate-300 pb-[2px]">Risk</label>
-            <select id="riskLevel" v-model="riskLevel">
+            <select id="riskLevel" v-model="riskLevel" :disabled="hasOutstandingBalls || autoBetInterval !== null">
                 <option v-for="item in riskLevels" :key="item.label" :value="item.value">
                     {{ item.label }}
                 </option>
@@ -22,71 +26,170 @@
 
         <div class="flex flex-col">
             <label for="rowCount" class="text-sm font-medium text-slate-300 pb-[2px]">Rows</label>
-            <select id="rowCount" v-model="rowCount">
+            <select id="rowCount" v-model="rowCount" :disabled="hasOutstandingBalls || autoBetInterval !== null">
                 <option v-for="item in rowCounts" :key="item.label" :value="item.value">
                     {{ item.label }}
                 </option>
             </select>
         </div>
-        <button
+
+        <div v-if="betMode === BetMode.AUTO">
+            <div class="flex flex-col gap-1">
+                <div class="relative flex items-center">
+                    <label for="autoBetInput" class="text-sm font-medium text-slate-300">Number of Bets</label>
+                    <PhQuestion class="text-slate-300 ml-[6px]" :class="{'cursor-pointer':isMouseEnterNumberBetHint}" weight="bold" 
+                        @mouseenter="isMouseEnterNumberBetHint = true" @mouseleave="isMouseEnterNumberBetHint = false" />
+                    <div v-if="isMouseEnterNumberBetHint" class="absolute top-[24px] left-[18px] z-30 max-w-lg rounded-md bg-white p-3 text-sm font-medium text-gray-950 drop-shadow-xl">
+                        <p>Enter '0' for unlimited bets.</p>
+                        <div class="tooltip-arrow" data-popper-arrow></div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <input
+                        id="autoBetInput"
+                        v-model="autoBetInputValue"
+                        :disabled="autoBetInterval !== null"
+                        type="number"
+                        min="0"
+                        inputmode="numeric"
+                        class='w-full rounded-md border-2 border-slate-600 bg-slate-900 py-2 pl-3 pr-8 text-sm text-white 
+                        transition-colors hover:cursor-pointer focus:border-slate-500 focus:outline-none disabled:cursor-not-allowed 
+                        disabled:opacity-50 hover:[&:not(:disabled)]:border-slate-500'
+                        :class="{ 'border-red-500 hover:border-red-400 focus:border-red-400':isAutoBetInputNegative }"
+                    />
+                    <!-- @focusout="handleAutoBetInputFocusOut" -->
+                    <PhInfinity v-if="autoBetInput === 0" class="absolute right-3 top-3 size-4 text-slate-400" weight="bold" />
+                </div>
+                <p v-if="isAutoBetInputNegative" class="text-xs leading-5 text-red-400">This must be greater than or equal to 0.</p>
+            </div>
+        </div>
+
+        <button 
             @click="handleBetClick"
-            class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors hover:bg-green-400 active:bg-green-600 disabled:bg-neutral-600 disabled:text-neutral-400'
+            :disabled="isDropBallDisabled"
+            class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors 
+            hover:bg-green-400 active:bg-green-600 disabled:bg-neutral-600 disabled:text-neutral-400'
+            :class="{ 'bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600':autoBetInterval !== null }"
         >
-            {{ betMode === BetMode.MANUAL? 'Drop Ball': '' }}
-            <!-- {#if betMode === BetMode.MANUAL}
-            Drop Ball
-            {:else if autoBetInterval === null}
-            Start Autobet
-            {:else}
-            Stop Autobet
-            {/if} -->
+            {{ betMode === BetMode.MANUAL? 'Drop Ball': autoBetInterval === null? 'Start Autobet': 'Stop Autobet' }}
         </button>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { BetMode, RiskLevel } from '../types';
+import { ref, computed } from 'vue';
 import { autoBetIntervalMs, rowCountOptions } from '../constants/game';
+import { BetMode, RiskLevel } from '../types';
+import { PhChartLine, PhGearSix, PhInfinity, PhQuestion } from '@phosphor-icons/vue';
 import { useGameStore } from '../stores/game';
 
 const game = useGameStore();
+const { balance, rowCount, riskLevel, betAmount, betAmountOfExistingBalls } = game;
 
-const betMode: BetMode = BetMode.MANUAL;
+const isMouseEnterNumberBetHint = ref<boolean>(false);
 
-const rowCount = ref(16);
-const riskLevel = ref(BetMode.MANUAL);
+const betMode = ref(BetMode.MANUAL);
 
-const handleBetClick = () => {
-    if (betMode === BetMode.MANUAL) {
-        console.log("Drop Ball");
-        game.setDropBall(true);
-    //   $plinkoEngine?.dropBall();
-    } 
-    // else if (autoBetInterval === null) {
-    //   autoBetsLeft = autoBetInput === 0 ? null : autoBetInput;
-    //   autoBetInterval = setInterval(autoBetDropBall, autoBetIntervalMs);
-    // } 
-    // else if (autoBetInterval !== null) {
-    //   resetAutoBetInterval();
-    // }
+/**
+ * When `betMode` is `AUTO`, the number of bets to be placed. Zero means infinite bets.
+ */
+const autoBetInput = ref<number>(0);
+
+/**
+ * Number of auto bets remaining when `betMode` is `AUTO`.
+ *
+ * - `number`: Finite count of how many bets left. It decrements from `autoBetInput` to 0.
+ * - `null`: For infinite bets (i.e. `autoBetInput` is 0).
+ */
+const autoBetsLeft = ref<number | null>(null);
+
+const autoBetInterval = ref<ReturnType<typeof setInterval> | null>(null);
+
+const isBetAmountNegative = computed(() => {
+    return betAmount < 0;
+});
+
+const isBetExceedBalance = computed(() => {
+    return betAmount > balance;
+});
+
+const isAutoBetInputNegative = computed(() => {
+    return autoBetInput.value < 0;
+});
+
+const isDropBallDisabled = computed(() => {
+    return isBetAmountNegative.value || isBetExceedBalance.value || isAutoBetInputNegative.value;
+});
+
+const hasOutstandingBalls = computed(() => {
+    return Object.keys(betAmountOfExistingBalls).length > 0;
+});
+
+const autoBetInputValue = computed(() => {
+    return autoBetInterval.value === null ? autoBetInput.value : autoBetsLeft.value ?? 0
+});
+
+// const handleBetAmountFocusOut: FormEventHandler<HTMLInputElement> = (e) => {
+//     const parsedValue = parseFloat(e.currentTarget.value.trim());
+//     if (isNaN(parsedValue)) {
+//       $betAmount = -1; // If input field is empty, this forces re-render so its value resets to 0
+//       $betAmount = 0;
+//     } else {
+//       $betAmount = parsedValue;
+//     }
+//   };
+
+const resetAutoBetInterval = () => {
+    if (autoBetInterval.value !== null) {
+        clearInterval(autoBetInterval.value);
+        autoBetInterval.value = null;
+    }
 };
 
-// let autoDropEnabled = false;
-//     let autoDroppingInterval = null;
-//     dropButton.addEventListener("click", () => {
-//       if (autoDropEnabled && autoDroppingInterval) {
-//         dropButton.innerHTML = "Start";
-//         clearInterval(autoDroppingInterval);
-//         autoDroppingInterval = null;
-//       } else if (autoDropEnabled && !autoDroppingInterval) {
-//         dropButton.innerHTML = "Stop";
-//         dropABall();
-//         autoDroppingInterval = setInterval(dropABall, 600);
-//       } else if (!autoDropEnabled) {
-//         dropABall();
-//       }
-//     });
+const autoBetDropBall = () => {
+    if (isBetExceedBalance.value) {
+      resetAutoBetInterval();
+      return;
+    }
+
+    // Infinite mode
+    if (autoBetsLeft.value === null) {
+      game.setDropBall(true);
+      return;
+    }
+
+    // Finite mode
+    if (autoBetsLeft.value > 0) {
+      game.setDropBall(true);
+      autoBetsLeft.value -= 1;
+    }
+    if (autoBetsLeft.value === 0 && autoBetInterval.value !== null) {
+      resetAutoBetInterval();
+      return;
+    }
+};
+
+const handleAutoBetInputFocusOut = () => {
+    if (isNaN(autoBetInputValue.value)) {
+      autoBetInput.value = -1; // If input field is empty, this forces re-render so its value resets to 0
+      autoBetInput.value = 0;
+    } else {
+      autoBetInput.value = autoBetInputValue.value;
+    }
+};
+
+const handleBetClick = () => {
+    if (betMode.value === BetMode.MANUAL) {
+        console.log("Drop Ball");
+        game.setDropBall(true);
+    } else if (autoBetInterval.value === null) {
+        autoBetsLeft.value = autoBetInput.value === 0? null : autoBetInput.value;
+        autoBetInterval.value = setInterval(autoBetDropBall, autoBetIntervalMs)
+    } else if (autoBetInterval.value !== null) {
+        resetAutoBetInterval();
+    }
+};
 
 const betModes = [
     { value: BetMode.MANUAL, label: 'Manual' },
