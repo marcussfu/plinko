@@ -14,7 +14,7 @@ import type { RowCount } from '../types';
  */
 export function computeBinProbabilities(rowCount: RowCount): number[] {
   const p = 0.5; // probability of success on a single trial
-  const probabilities = [];
+  const probabilities:number[] = [];
 
   for (let k = 0; k <= rowCount; k++) {
     const binomialCoefficient = factorial(rowCount) / (factorial(k) * factorial(rowCount - k));
