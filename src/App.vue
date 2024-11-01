@@ -13,7 +13,7 @@ import logo from './assets/logo.svg';
       <div class="mx-auto flex h-14 max-w-7xl items-center justify-between">
         <img :src="logo" alt="logo" class="h-6 sm:h-7" />
         <div class="mx-auto">
-          <Balance />
+          <!-- <Balance /> -->
         </div>
       </div>
     </nav>
