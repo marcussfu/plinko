@@ -26,7 +26,7 @@
 
         <div class="flex flex-col">
             <label for="rowCount" class="text-sm font-medium text-slate-300 pb-[2px]">Rows</label>
-            <select id="rowCount" v-model="rowCount" :disabled="hasOutstandingBalls || autoBetInterval !== null">
+            <select id="rowCount" v-model="currentRowCount" :disabled="hasOutstandingBalls || autoBetInterval !== null" @change="changeRowCount">
                 <option v-for="item in rowCounts" :key="item.label" :value="item.value">
                     {{ item.label }}
                 </option>
@@ -78,9 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { autoBetIntervalMs, rowCountOptions } from '../constants/game';
-import { BetMode, RiskLevel } from '../types';
+import { BetMode, RiskLevel, type RowCount } from '../types';
 import { PhChartLine, PhGearSix, PhInfinity, PhQuestion } from '@phosphor-icons/vue';
 import { useGameStore } from '../stores/game';
 
@@ -105,6 +105,8 @@ const autoBetInput = ref<number>(0);
 const autoBetsLeft = ref<number | null>(null);
 
 const autoBetInterval = ref<ReturnType<typeof setInterval> | null>(null);
+
+const currentRowCount = ref<RowCount>(rowCount);
 
 const isBetAmountNegative = computed(() => {
     return betAmount < 0;
@@ -201,6 +203,10 @@ const riskLevels = [
     { value: RiskLevel.HIGH, label: 'High' },
 ];
 const rowCounts = rowCountOptions.map((value) => ({ value, label: value.toString() }));
+
+const changeRowCount = () => {
+    game.setRowCount(currentRowCount.value);
+}
 </script>
 
 <style scoped>

@@ -20,6 +20,11 @@ export const useGameStore = defineStore('game', () => {
 
    const rowCount = ref<RowCount>(16);
 
+   const setRowCount = (value:RowCount) => {
+    rowCount.value = value;
+    console.log("JJJJJJJJ", rowCount.value);
+   }
+
    const riskLevel = ref<RiskLevel>(RiskLevel.MEDIUM);
 
    const winRecords = ref<WinRecord[]>([]);
@@ -98,6 +103,7 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
     binColors, 
     binProbabilities,
     isDropBall,
-    setDropBall
+    setDropBall,
+    setRowCount
    }
 })
