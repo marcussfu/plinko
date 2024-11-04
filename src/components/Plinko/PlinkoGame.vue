@@ -52,13 +52,33 @@
 
   // create an engine
   const engine = Engine.create({
-    // timing: {
-    //   timeScale: 1,
-    // },
-    gravity: {
-      scale: 0.0007,
+    timing: {
+      timeScale: 1,
     },
+    // gravity: {
+    //   scale: 0.0007,
+    // },
   });
+
+  type BallFrictionsByRowCount = {
+    friction: NonNullable<IBodyDefinition['friction']>;
+    frictionAirByRowCount: Record<RowCount, NonNullable<IBodyDefinition['frictionAir']>>;
+  };
+
+  const ballFrictions: BallFrictionsByRowCount = {
+    friction: 0.5,
+    frictionAirByRowCount: {
+      8: 0.0395,
+      9: 0.041,
+      10: 0.038,
+      11: 0.0355,
+      12: 0.0414,
+      13: 0.0437,
+      14: 0.0401,
+      15: 0.0418,
+      16: 0.0364,
+    },
+  };
   
   onMounted(() => {
     // create a renderer
@@ -124,7 +144,7 @@
   const dropABall = () => {
     const ballOffsetRangeX = pinDistanceX.value * 0.8;
     const ballRadius = pinRadius.value * 2;
-    // const { friction, frictionAirByRowCount } = PlinkoEngine.ballFrictions;
+    const { friction, frictionAirByRowCount } = ballFrictions;
 
     const ball = Bodies.circle(
       getRandomBetween(
@@ -134,51 +154,22 @@
       0,
       ballRadius,
       {
-        label: "Ball",
-        restitution: 0.6,
+        restitution: 0.6, // Bounciness
+        friction,
+        frictionAir: frictionAirByRowCount[game.rowCount],
+        collisionFilter: {
+          category: BALL_CATEGORY,
+          mask: PIN_CATEGORY, // Collide with pins only, but not other balls
+        },
         render: {
-          fillStyle: "#f23",
+          fillStyle: '#ff0000',
         },
       }
-      // {
-      //   restitution: 0.8, // Bounciness
-      //   friction,
-      //   frictionAir: frictionAirByRowCount[game.rowCount],
-      //   collisionFilter: {
-      //     category: BALL_CATEGORY,
-      //     mask: PIN_CATEGORY, // Collide with pins only, but not other balls
-      //   },
-      //   render: {
-      //     fillStyle: '#ff0000',
-      //   },
-      // },
     );
     Composite.add(engine.world, ball);
 
-    // this.game.betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
-    // this.game.balance.update((balance) => balance - this.betAmount);
-
-
-
-
-
-
-
-
-    // const dropLeft = width / 2 - GAP;
-    // const dropRight = width / 2 + GAP;
-    // const dropWidth = dropRight - dropLeft;
-    // const x = Math.random() * dropWidth + dropLeft;
-    // const y = -PEG_RAD;
-
-    // const ball = Bodies.circle(x, y, BALL_RAD, {
-    //   label: "Ball",
-    //   restitution: 0.6,
-    //   render: {
-    //     fillStyle: "#f23",
-    //   },
-    // });
-    // Composite.add(engine.world, [ball]);
+    // game.betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
+    // game.balance.update((balance) => balance - this.betAmount);
   }
 
   const updateRowCount = (currentRowCount:RowCount) => {
@@ -244,159 +235,7 @@
       }
     }
     Composite.add(engine.world, pins.value);
-
-    // // Create pegs
-    // const pegs = [];
-    // for (let r = 0; r < rowCount; r++) {
-    //   const pegsInRow = r + 3;
-    //   for (let c = 0; c < pegsInRow; c++) {
-    //     const x = width / 2 + (c - (pegsInRow - 1) / 2) * GAP;
-    //     const y = GAP + r * GAP;
-    //     const peg = Bodies.circle(x, y, PEG_RAD, {
-    //       isStatic: true,
-    //       label: "Peg",
-    //       render: {
-    //         fillStyle: "#fff",
-    //       },
-    //     });
-    //     pegs.push(peg);
-    //   }
-    // }
-    // Composite.add(engine.world, pegs);
-
-
-    // const { PADDING_X, PADDING_TOP, PADDING_BOTTOM, PIN_CATEGORY, BALL_CATEGORY } = PlinkoEngine;
-
-    
-    // if (this.pinsLastRowXCoords.length > 0) {
-    //   this.pinsLastRowXCoords = [];
-    // }
-    // if (this.walls.length > 0) {
-    //   Matter.Composite.remove(this.engine.world, this.walls);
-    //   this.walls = [];
-    // }
-
-    // for (let row = 0; row < this.rowCount; ++row) {
-    //   const rowY =
-    //     PADDING_TOP +
-    //     ((this.canvas.height - PADDING_TOP - PADDING_BOTTOM) / (this.rowCount - 1)) * row;
-
-    //   /** Horizontal distance between canvas left/right boundary and first/last pin of the row. */
-    //   const rowPaddingX = PADDING_X + ((this.rowCount - 1 - row) * this.pinDistanceX) / 2;
-
-    //   for (let col = 0; col < 3 + row; ++col) {
-    //     const colX = rowPaddingX + ((this.canvas.width - rowPaddingX * 2) / (3 + row - 1)) * col;
-    //     const pin = Matter.Bodies.circle(colX, rowY, this.pinRadius, {
-    //       isStatic: true,
-    //       render: {
-    //         fillStyle: '#ffffff',
-    //       },
-    //       collisionFilter: {
-    //         category: PIN_CATEGORY,
-    //         mask: BALL_CATEGORY, // Collide with balls
-    //       },
-    //     });
-    //     this.pins.push(pin);
-
-    //     if (row === this.rowCount - 1) {
-    //       this.pinsLastRowXCoords.push(colX);
-    //     }
-    //   }
-    // }
-    // Matter.Composite.add(this.engine.world, this.pins);
-
-    // const firstPinX = this.pins[0].position.x;
-    // const leftWallAngle = Math.atan2(
-    //   firstPinX - this.pinsLastRowXCoords[0],
-    //   this.canvas.height - PADDING_TOP - PADDING_BOTTOM,
-    // );
-    // const leftWallX =
-    //   firstPinX - (firstPinX - this.pinsLastRowXCoords[0]) / 2 - this.pinDistanceX * 0.25;
-
-    // const leftWall = Matter.Bodies.rectangle(
-    //   leftWallX,
-    //   this.canvas.height / 2,
-    //   10,
-    //   this.canvas.height,
-    //   {
-    //     isStatic: true,
-    //     angle: leftWallAngle,
-    //     render: { visible: false },
-    //   },
-    // );
-    // const rightWall = Matter.Bodies.rectangle(
-    //   this.canvas.width - leftWallX,
-    //   this.canvas.height / 2,
-    //   10,
-    //   this.canvas.height,
-    //   {
-    //     isStatic: true,
-    //     angle: -leftWallAngle,
-    //     render: { visible: false },
-    //   },
-    // );
-    // this.walls.push(leftWall, rightWall);
-    // Matter.Composite.add(this.engine.world, this.walls);
   }
-  
-  const checkCollision = (event, label1, label2, callback) => {
-    event.pairs.forEach(({ bodyA, bodyB }) => {
-      let body1 = null, body2 = null;
-      if (bodyA.label === label1 && bodyB.label === label2) {
-        body1 = bodyA;
-        body2 = bodyB;
-      } else if (bodyA.label === label2 && bodyB.label === label1) {
-        body1 = bodyB;
-        body2 = bodyA;
-      }
-
-      if (body1 && body2) {
-        callback(body1, body2);
-      }
-    });
-  }
-
-  // Trigger event on ball hitting ground
-  Matter.Events.on(engine, "collisionStart", (event) => {console.log("XZZZZZ");
-    event.pairs.forEach(({ bodyA, bodyB }) => {
-      // check for ball hitting the ground
-      // checkCollision(event, "Ball", "Ground", (ballToRemove) => {
-      //   Matter.Composite.remove(engine.world, ballToRemove);
-      //   const index = Math.floor(
-      //     (ballToRemove.position.x - width / 2) / GAP + 17 / 2
-      //   );
-      //   if (index >= 0 && index < 17) {
-      //     // Register ball
-      //     const ballsWon = Math.floor(multipliers[index]);
-      //     // balls += ballsWon;
-      //     // Ball hit note at bottom
-      //     const el = document.getElementById(`note-${index}`);
-      //     if (el.dataset.pressed !== "true") {
-      //       el.dataset.pressed = true;
-      //       setTimeout(() => {
-      //         el.dataset.pressed = false;
-      //       }, 500);
-      //     }
-      //   }
-      // });
-
-      // track animations for pegs
-      const pegAnims = new Array(pins.value.length).fill(null);
-
-      // check for ball hitting pin
-      checkCollision(event, "Peg", "Ball", (pegToAnimate) => {
-        const index = pins.value.findIndex((peg) => peg === pegToAnimate);
-        if (index === -1) {
-          throw new Error(
-            "Could not find peg in pegs array even though we registered an ball hitting this peg"
-          );
-        }
-        if (!pegAnims[index]) {
-          pegAnims[index] = new Date().getTime();
-        }
-      });
-    });
-  });
 </script>
 
 <template>

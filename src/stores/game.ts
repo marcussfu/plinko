@@ -22,7 +22,6 @@ export const useGameStore = defineStore('game', () => {
 
    const setRowCount = (value:RowCount) => {
     rowCount.value = value;
-    console.log("JJJJJJJJ", rowCount.value);
    }
 
    const riskLevel = ref<RiskLevel>(RiskLevel.MEDIUM);
