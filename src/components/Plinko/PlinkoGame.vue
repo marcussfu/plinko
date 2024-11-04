@@ -106,6 +106,11 @@
     Runner.stop(runner);
   });
 
+  const binsWidthPercentage = computed<number>(() => {
+    const lastPinX = pinsLastRowXCoords.value[pinsLastRowXCoords.value.length - 1];
+    return (lastPinX - pinsLastRowXCoords.value[0]) / WIDTH;
+  });
+
   /**
    * Gets the horizontal distance between each pin's center point.
    */
@@ -249,7 +254,7 @@
           <!-- <canvas v-init-plinko="game" width={WIDTH} height={HEIGHT} class="absolute inset-0 h-full w-full" /> -->
         <!-- <canvas use:initPlinko width={WIDTH} height={HEIGHT} class="absolute inset-0 h-full w-full" /> -->
       </div>
-      <!-- <BinsRow /> -->
+      <BinsRow :binsWidthPercentage="binsWidthPercentage" />
     </div>
     <div class="absolute right-[5%] top-1/2 -translate-y-1/2">
       <!-- <LastWins /> -->
