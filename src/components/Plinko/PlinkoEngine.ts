@@ -5,14 +5,15 @@ import { binPayouts } from '../../constants/game';
 //   riskLevel,
 //   betAmount,
 //   balance,
-//   betAmountOfExistingBalls,
+//   game.betAmountOfExistingBalls,
 //   totalProfitHistory,
 // } from '$lib/stores/game';
+import { useGameStore } from '@/stores/game';
 import type { RiskLevel, RowCount } from '../../types';
 import { getRandomBetween } from '../../utils/numbers';
 import Matter, { type IBodyDefinition } from 'matter-js';
 // import { get } from 'svelte/store';
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 type BallFrictionsByRowCount = {
   friction: NonNullable<IBodyDefinition['friction']>;
@@ -101,6 +102,8 @@ class PlinkoEngine {
     },
   };
 
+  private game;
+
   /**
    * Creates the engine and the game's layout.
    *
@@ -112,12 +115,14 @@ class PlinkoEngine {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
 
-    this.betAmount = get(betAmount);
-    this.rowCount = get(rowCount);
-    this.riskLevel = get(riskLevel);
-    betAmount.subscribe((value) => (this.betAmount = value));
-    rowCount.subscribe((value) => this.updateRowCount(value));
-    riskLevel.subscribe((value) => (this.riskLevel = value));
+    this.game = useGameStore();
+
+    this.betAmount = this.game.betAmount;
+    this.rowCount = this.game.rowCount;
+    this.riskLevel = this.game.riskLevel;
+    // this.game.betAmount.subscribe((value) => (this.betAmount = value));
+    // this.game.rowCount.subscribe((value) => this.updateRowCount(value));
+    // this.game.riskLevel.subscribe((value) => (this.riskLevel = value));
 
     this.engine = Matter.Engine.create({
       timing: {
@@ -136,7 +141,7 @@ class PlinkoEngine {
     });
     this.runner = Matter.Runner.create();
 
-    this.placePinsAndWalls();
+    this.placePinsAndWalls();console.log("TTTTT");
 
     this.sensor = Matter.Bodies.rectangle(
       this.canvas.width / 2,
@@ -209,8 +214,8 @@ class PlinkoEngine {
     );
     Matter.Composite.add(this.engine.world, ball);
 
-    betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
-    balance.update((balance) => balance - this.betAmount);
+    this.game.betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
+    this.game.balance.update((balance) => balance - this.betAmount);
   }
 
   /**
@@ -253,14 +258,23 @@ class PlinkoEngine {
    * Called when a ball hits the invisible sensor at the bottom.
    */
   private handleBallEnterBin(ball: Matter.Body) {
-    const binIndex = this.pinsLastRowXCoords.findLastIndex((pinX) => pinX < ball.position.x);
+    // const binIndex = this.pinsLastRowXCoords.findLastIndex((pinX) => pinX < ball.position.x);
+
+    let binIndex = -1;
+    for (let i = this.pinsLastRowXCoords.length - 1; i>=0; i--) {
+      if (this.pinsLastRowXCoords[i] < ball.position.x) {
+        binIndex = i;
+        break;
+      }
+    }
+
     if (binIndex !== -1 && binIndex < this.pinsLastRowXCoords.length - 1) {
-      const betAmount = get(betAmountOfExistingBalls)[ball.id] ?? 0;
+      const betAmount = this.game.betAmountOfExistingBalls[ball.id] ?? 0;
       const multiplier = binPayouts[this.rowCount][this.riskLevel][binIndex];
       const payoutValue = betAmount * multiplier;
       const profit = payoutValue - betAmount;
 
-      winRecords.update((records) => [
+      this.game.winRecords.update((records) => [
         ...records,
         {
           id: uuidv4(),
@@ -274,15 +288,15 @@ class PlinkoEngine {
           profit,
         },
       ]);
-      totalProfitHistory.update((history) => {
+      this.game.totalProfitHistory.update((history) => {
         const lastTotalProfit = history.slice(-1)[0];
         return [...history, lastTotalProfit + profit];
       });
-      balance.update((balance) => balance + payoutValue);
+      this.game.balance.update((balance) => balance + payoutValue);
     }
 
     Matter.Composite.remove(this.engine.world, ball);
-    betAmountOfExistingBalls.update((value) => {
+    this.game.betAmountOfExistingBalls.update((value) => {
       const newValue = { ...value };
       delete newValue[ball.id];
       return newValue;
@@ -376,7 +390,7 @@ class PlinkoEngine {
         Matter.Composite.remove(this.engine.world, body);
       }
     });
-    betAmountOfExistingBalls.set({});
+    this.game.betAmountOfExistingBalls.set({});
   }
 }
 

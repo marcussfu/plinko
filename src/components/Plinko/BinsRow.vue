@@ -1,13 +1,13 @@
 <template>
   <!-- Height clamping in mobile: From 10px at 370px viewport width to 16px at 600px viewport width -->
   <div class="flex h-[clamp(10px,0.352px+2.609vw,16px)] w-full justify-center lg:h-7">
-      <!-- <div v-if="game.plinkoEngine" class="flex gap-[1%]" style:width={`${($plinkoEngine.binsWidthPercentage ?? 0) * 100}%`}>
-        {#each binPayouts[$rowCount][$riskLevel] as payout, binIndex} -->
-          <!-- Font-size clamping:
+      <div v-if="game.plinkoEngine" class="flex gap-[1%]" :style="{ width: (game.plinkoEngine.binsWidthPercentage ?? 0 * 100) + '%' }">
+        <!-- {#each binPayouts[$rowCount][$riskLevel] as payout, binIndex}
+          Font-size clamping:
                 - Mobile (< 1024px): From 6px at 370px viewport width to 8px at 600px viewport width
                 - Desktop (>= 1024px): From 10px at 1024px viewport width to 12px at 1100px viewport width
-          -->
-          <!-- <div
+         
+          <div
             use:initAnimation
             class="flex min-w-0 flex-1 items-center justify-center rounded-sm text-[clamp(6px,2.784px+0.87vw,8px)] font-bold text-gray-950 shadow-[0_2px_var(--shadow-color)] lg:rounded-md lg:text-[clamp(10px,-16.944px+2.632vw,12px)] lg:shadow-[0_3px_var(--shadow-color)]"
             style:background-color={binColorsByRowCount[$rowCount].background[binIndex]}
@@ -15,8 +15,8 @@
           >
             {payout}{payout < 100 ? '×' : ''}
           </div>
-        {/each}
-      </div> -->
+        {/each} -->
+      </div>
 </div>
 </template>
 
@@ -29,6 +29,8 @@
   // import { plinkoEngine, riskLevel, rowCount, winRecords } from '../../stores/game';
   // import { isAnimationOn } from '$lib/stores/settings';
   // import type { Action } from 'svelte/action';
+
+  console.log("RRRRRR", game.plinkoEngine);
 
   /**
    * Bounce animations for each bin, which is played when a ball falls into the bin.
