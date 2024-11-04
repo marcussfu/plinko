@@ -26,9 +26,11 @@ export const useGameStore = defineStore('game', () => {
 
    const riskLevel = ref<RiskLevel>(RiskLevel.MEDIUM);
 
+   const setRiskLevel = (value: RiskLevel) => {
+    riskLevel.value = value;
+   }
+
    const winRecords = ref<WinRecord[]>([]);
-
-
 
    const isDropBall = ref<boolean>(false);
 
@@ -103,6 +105,7 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
     binProbabilities,
     isDropBall,
     setDropBall,
+    setRiskLevel,
     setRowCount
    }
 })

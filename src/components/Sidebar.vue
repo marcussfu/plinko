@@ -17,7 +17,7 @@
 
         <div class="flex flex-col">
             <label for="riskLevel" class="text-sm font-medium text-slate-300 pb-[2px]">Risk</label>
-            <select id="riskLevel" v-model="riskLevel" :disabled="hasOutstandingBalls || autoBetInterval !== null">
+            <select id="riskLevel" v-model="currentRiskLevel" :disabled="hasOutstandingBalls || autoBetInterval !== null" @change="changeRiskLevel">
                 <option v-for="item in riskLevels" :key="item.label" :value="item.value">
                     {{ item.label }}
                 </option>
@@ -107,6 +107,8 @@ const autoBetsLeft = ref<number | null>(null);
 const autoBetInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const currentRowCount = ref<RowCount>(rowCount);
+
+const currentRiskLevel = ref<RiskLevel>(riskLevel);
 
 const isBetAmountNegative = computed(() => {
     return betAmount < 0;
@@ -203,6 +205,10 @@ const riskLevels = [
     { value: RiskLevel.HIGH, label: 'High' },
 ];
 const rowCounts = rowCountOptions.map((value) => ({ value, label: value.toString() }));
+
+const changeRiskLevel = () => {
+    game.setRiskLevel(currentRiskLevel.value);
+}
 
 const changeRowCount = () => {
     game.setRowCount(currentRowCount.value);
