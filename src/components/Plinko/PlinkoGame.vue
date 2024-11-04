@@ -6,11 +6,12 @@
   import LastWins from './LastWins.vue';
   import PlinkoEngine from './PlinkoEngine';
   import {
-  RiskLevel,
-  type BetAmountOfExistingBalls,
-  type RowCount,
-  type WinRecord,
-} from '../../types';
+    RiskLevel,
+    type BetAmountOfExistingBalls,
+    type RowCount,
+    type WinRecord,
+  } from '../../types';
+  import { getRandomBetween } from '../../utils/numbers';
 
   import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
   import Matter, { type IBodyDefinition } from 'matter-js';
@@ -75,53 +76,6 @@
 
     placePinsAndWalls();
 
-    // const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    // game.plinkoEngine = new PlinkoEngine(canvas);
-    // game.plinkoEngine.start();
-
-    // const engine = Matter.Engine.create({
-    //   timing: {
-    //     timeScale: 1,
-    //   },
-    // });
-    // const render = Matter.Render.create({
-    //   engine: engine,
-    //   canvas: canvas,
-    //   options: {
-    //     width: PlinkoEngine.WIDTH,
-    //     height: PlinkoEngine.HEIGHT,
-    //     background: '#0f1728',
-    //     wireframes: false,
-    //   },
-    // });
-    // const runner = Matter.Runner.create();
-
-    // // placePinsAndWalls();console.log("TTTTT");
-
-    // const sensor = Matter.Bodies.rectangle(
-    //   canvas.width / 2,
-    //   canvas.height,
-    //   canvas.width,
-    //   10,
-    //   {
-    //     isSensor: true,
-    //     isStatic: true,
-    //     render: {
-    //       visible: false,
-    //     },
-    //   },
-    // );
-    // Matter.Composite.add(engine.world, [sensor]);
-    // // Matter.Events.on(engine, 'collisionStart', ({ pairs }) => {
-    // //   pairs.forEach(({ bodyA, bodyB }) => {
-    // //     if (bodyA === sensor) {
-    // //       handleBallEnterBin(bodyB);
-    // //     } else if (bodyB === sensor) {
-    // //       handleBallEnterBin(bodyA);
-    // //     }
-    // //   });
-    // // });
-
     // run the renderer
     Render.run(render); // Renders the scene to canvas
     Runner.run(runner, engine); // Starts the simulation in physics engine
@@ -155,6 +109,77 @@
       }
     }
   );
+
+  watch(
+    () => game.isDropBall,
+    (newVal) => {
+      console.log("isDropBall changed:", newVal);
+      if (newVal) {
+        dropABall();
+        game.setDropBall(false);  // Reset `isDropBall` after handling
+      }
+    }
+  );
+
+  const dropABall = () => {
+    const ballOffsetRangeX = pinDistanceX.value * 0.8;
+    const ballRadius = pinRadius.value * 2;
+    // const { friction, frictionAirByRowCount } = PlinkoEngine.ballFrictions;
+
+    const ball = Bodies.circle(
+      getRandomBetween(
+        canvas.value!.width / 2 - ballOffsetRangeX,
+        canvas.value!.width / 2 + ballOffsetRangeX,
+      ),
+      0,
+      ballRadius,
+      {
+        label: "Ball",
+        restitution: 0.6,
+        render: {
+          fillStyle: "#f23",
+        },
+      }
+      // {
+      //   restitution: 0.8, // Bounciness
+      //   friction,
+      //   frictionAir: frictionAirByRowCount[game.rowCount],
+      //   collisionFilter: {
+      //     category: BALL_CATEGORY,
+      //     mask: PIN_CATEGORY, // Collide with pins only, but not other balls
+      //   },
+      //   render: {
+      //     fillStyle: '#ff0000',
+      //   },
+      // },
+    );
+    Composite.add(engine.world, ball);
+
+    // this.game.betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
+    // this.game.balance.update((balance) => balance - this.betAmount);
+
+
+
+
+
+
+
+
+    // const dropLeft = width / 2 - GAP;
+    // const dropRight = width / 2 + GAP;
+    // const dropWidth = dropRight - dropLeft;
+    // const x = Math.random() * dropWidth + dropLeft;
+    // const y = -PEG_RAD;
+
+    // const ball = Bodies.circle(x, y, BALL_RAD, {
+    //   label: "Ball",
+    //   restitution: 0.6,
+    //   render: {
+    //     fillStyle: "#f23",
+    //   },
+    // });
+    // Composite.add(engine.world, [ball]);
+  }
 
   const updateRowCount = (currentRowCount:RowCount) => {
     // if (currentRowCount === game.rowCount) {
@@ -202,6 +227,7 @@
         const colX = rowPaddingX + ((canvas.value!.width - rowPaddingX * 2) / (3 + row - 1)) * col;
         const pin = Bodies.circle(colX, rowY, pinRadius.value, {
           isStatic: true,
+          label: "Peg",
           render: {
             fillStyle: '#ffffff',
           },
@@ -312,20 +338,65 @@
     // this.walls.push(leftWall, rightWall);
     // Matter.Composite.add(this.engine.world, this.walls);
   }
-
-
   
+  const checkCollision = (event, label1, label2, callback) => {
+    event.pairs.forEach(({ bodyA, bodyB }) => {
+      let body1 = null, body2 = null;
+      if (bodyA.label === label1 && bodyB.label === label2) {
+        body1 = bodyA;
+        body2 = bodyB;
+      } else if (bodyA.label === label2 && bodyB.label === label1) {
+        body1 = bodyB;
+        body2 = bodyA;
+      }
 
-  // const initPlinko: Action<HTMLCanvasElement> = (node) => {
-  //   game.plinkoEngine = new PlinkoEngine(node);
-  //   game.plinkoEngine.start();
+      if (body1 && body2) {
+        callback(body1, body2);
+      }
+    });
+  }
 
-  //   return {
-  //     destroy: () => {
-  //       game.plinkoEngine?.stop();
-  //     },
-  //   };
-  // };
+  // Trigger event on ball hitting ground
+  Matter.Events.on(engine, "collisionStart", (event) => {console.log("XZZZZZ");
+    event.pairs.forEach(({ bodyA, bodyB }) => {
+      // check for ball hitting the ground
+      // checkCollision(event, "Ball", "Ground", (ballToRemove) => {
+      //   Matter.Composite.remove(engine.world, ballToRemove);
+      //   const index = Math.floor(
+      //     (ballToRemove.position.x - width / 2) / GAP + 17 / 2
+      //   );
+      //   if (index >= 0 && index < 17) {
+      //     // Register ball
+      //     const ballsWon = Math.floor(multipliers[index]);
+      //     // balls += ballsWon;
+      //     // Ball hit note at bottom
+      //     const el = document.getElementById(`note-${index}`);
+      //     if (el.dataset.pressed !== "true") {
+      //       el.dataset.pressed = true;
+      //       setTimeout(() => {
+      //         el.dataset.pressed = false;
+      //       }, 500);
+      //     }
+      //   }
+      // });
+
+      // track animations for pegs
+      const pegAnims = new Array(pins.value.length).fill(null);
+
+      // check for ball hitting pin
+      checkCollision(event, "Peg", "Ball", (pegToAnimate) => {
+        const index = pins.value.findIndex((peg) => peg === pegToAnimate);
+        if (index === -1) {
+          throw new Error(
+            "Could not find peg in pegs array even though we registered an ball hitting this peg"
+          );
+        }
+        if (!pegAnims[index]) {
+          pegAnims[index] = new Date().getTime();
+        }
+      });
+    });
+  });
 </script>
 
 <template>
