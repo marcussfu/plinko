@@ -16,6 +16,10 @@ export const useGameStore = defineStore('game', () => {
 
    const betAmount = ref<number>(1);
 
+   const setBetAmount = (value: number) => {
+    betAmount.value = value;
+   }
+
    const betAmountOfExistingBalls = ref<BetAmountOfExistingBalls>({});
 
    const rowCount = ref<RowCount>(16);
@@ -37,8 +41,6 @@ export const useGameStore = defineStore('game', () => {
    const setDropBall = (value: boolean) => {
     isDropBall.value = value;
    }
-
-
 
 /**
  * History of total profits. Should be updated whenever a new win record is pushed
@@ -105,6 +107,7 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
     binProbabilities,
     isDropBall,
     setDropBall,
+    setBetAmount,
     setRiskLevel,
     setRowCount
    }

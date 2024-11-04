@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, watch, onMounted } from 'vue';
   import { binColorsByRowCount, binPayouts } from '../../constants/game';
   import { useGameStore } from '@/stores/game';
   const game = useGameStore();
@@ -35,14 +36,21 @@
   /**
    * Bounce animations for each bin, which is played when a ball falls into the bin.
    */
-  const binAnimations: Animation[] = [];
+  const binAnimations = ref<Animation[]>([]);
 
-  // $: {
-  //   if ($winRecords.length) {
-  //     const lastWinBinIndex = $winRecords[$winRecords.length - 1].binIndex;
-  //     playAnimation(lastWinBinIndex);
-  //   }
-  // }
+  // onMounted(() -> {
+
+  // });
+
+  watch(
+    () => game.winRecords,
+    (newVal) => {
+      if (newVal.length) {
+        const lastWinBinIndex = game.winRecords.indexOf(game.winRecords[game.winRecords.length - 1]);
+        playAnimation(lastWinBinIndex);
+      }
+    }
+  );
 
   // const initAnimation: Action<HTMLDivElement> = (node) => {
   //   const bounceAnimation = node.animate(
@@ -60,17 +68,17 @@
   //   binAnimations.push(bounceAnimation);
   // };
 
-  // function playAnimation(binIndex: number) {
-  //   if (!$isAnimationOn) {
-  //     return;
-  //   }
+  const playAnimation = (binIndex: number) => {
+    // if (!$isAnimationOn) {
+    //   return;
+    // }
+console.log("JJJJJ", binIndex);
+    const animation = binAnimations.value[binIndex];
 
-  //   const animation = binAnimations[binIndex];
+    // Always reset animation before playing. Safari has a weird behavior where
+    // the animation will not play the second time if it's not cancelled.
+    animation.cancel();
 
-  //   // Always reset animation before playing. Safari has a weird behavior where
-  //   // the animation will not play the second time if it's not cancelled.
-  //   animation.cancel();
-
-  //   animation.play();
-  // }
+    animation.play();
+  }
 </script>

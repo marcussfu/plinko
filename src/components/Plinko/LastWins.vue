@@ -7,26 +7,17 @@
     class="flex w-[clamp(1.5rem,0.893rem+2.857vw,2rem)] flex-col overflow-hidden rounded-sm text-[clamp(8px,5.568px+0.714vw,10px)] md:rounded-md lg:w-12 lg:text-sm"
     :style="{ aspectRatio: 1/winCount }"
   >
-  <!-- style:aspect-ratio={`1 / ${winCount}`} -->
-    <!-- <div v-for="item in lastWins" :key="item.binIndex"
+    <div v-for="item in lastWins" :key="item.binIndex"
       class="flex aspect-square items-center justify-center font-bold text-gray-950"
+      :style="{ backgroundColor: binColorsByRowCount[game.rowCount].background[item.binIndex] }"
     >
-      {{ item.multiplier + item.multiplier < 100 ? '×' : '' }}
-    </div> -->
-  
-    <!-- {#each lastWins as { binIndex, rowCount, payout: { multiplier } }}
-      <div
-        class="flex aspect-square items-center justify-center font-bold text-gray-950"
-        style:background-color={binColorsByRowCount[rowCount].background[binIndex]}
-      >
-        {multiplier}{multiplier < 100 ? '×' : ''}
-      </div>
-    {/each} -->
+      {{ item.payout.multiplier + item.payout.multiplier < 100 ? '×' : '' }}
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue';
+  import { computed } from 'vue';
   import { binColorsByRowCount } from '../../constants/game';
   import { useGameStore } from '@/stores/game';
   const game = useGameStore();
@@ -36,9 +27,7 @@
    */
   const winCount = 4;
 
-  // const lastWins = computed(() => {
-  //   return game.winRecords.slice(-winCount);
-  // });
-
-  // $: lastWins = $winRecords.slice(-winCount).reverse();
+  const lastWins = computed(() => {
+    return game.winRecords.slice(-winCount).reverse();
+  });
 </script>

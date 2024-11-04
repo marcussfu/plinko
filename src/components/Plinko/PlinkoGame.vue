@@ -4,7 +4,7 @@
   // import type { Action } from 'svelte/action';
   import BinsRow from './BinsRow.vue';
   import LastWins from './LastWins.vue';
-  import PlinkoEngine from './PlinkoEngine';
+  // import PlinkoEngine from './PlinkoEngine';
   import {
     RiskLevel,
     type BetAmountOfExistingBalls,
@@ -12,13 +12,12 @@
     type WinRecord,
   } from '../../types';
   import { getRandomBetween } from '../../utils/numbers';
+  import { binPayouts } from '../../constants/game';
 
   import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
   import Matter, { type IBodyDefinition } from 'matter-js';
 
   const game = useGameStore();
-
-  const { riskLevel, rowCount, winRecords } = game;
 
   // const { WIDTH, HEIGHT } = PlinkoEngine;
 
@@ -40,9 +39,23 @@
       Bodies = Matter.Bodies,
       Composite = Matter.Composite;
 
+  /**
+   * Every pin of the game.
+   */
   const pins = ref<Matter.Body[]>([]);
 
+  /**
+   * Walls are invisible, slanted "guard rails" at the left and right sides of the
+   * pin triangle. It prevents balls from falling outside the pin triangle and not
+   * hitting a bin.
+   */
   const walls = ref<Matter.Body[]>([]);
+
+  /**
+   * "Sensor" is an invisible body at the bottom of the canvas. It detects whether
+   * a ball arrives at the bottom and enters a bin.
+   */
+  const sensor = ref<Matter.Body>();
 
   const pinsLastRowXCoords = ref<number[]>([]);
 
@@ -96,6 +109,30 @@
 
     placePinsAndWalls();
 
+    sensor.value = Bodies.rectangle(
+      canvas.value.width / 2,
+      canvas.value.height,
+      canvas.value.width,
+      10,
+      {
+        isSensor: true,
+        isStatic: true,
+        render: {
+          visible: false,
+        },
+      },
+    );
+    Composite.add(engine.world, [sensor.value]);
+    Events.on(engine, 'collisionStart', ({ pairs }) => {
+      pairs.forEach(({ bodyA, bodyB }) => {
+        if (bodyA === sensor.value) {
+          handleBallEnterBin(bodyB);
+        } else if (bodyB === sensor.value) {
+          handleBallEnterBin(bodyA);
+        }
+      });
+    });
+
     // run the renderer
     Render.run(render); // Renders the scene to canvas
     Runner.run(runner, engine); // Starts the simulation in physics engine
@@ -138,7 +175,6 @@
   watch(
     () => game.isDropBall,
     (newVal) => {
-      console.log("isDropBall changed:", newVal);
       if (newVal) {
         dropABall();
         game.setDropBall(false);  // Reset `isDropBall` after handling
@@ -241,6 +277,43 @@
     }
     Composite.add(engine.world, pins.value);
   }
+
+  const handleBallEnterBin = (ball: Matter.Body) => {
+    const binIndex = pinsLastRowXCoords.value.findLastIndex((pinX) => pinX < ball.position.x);
+    if (binIndex !== -1 && binIndex < pinsLastRowXCoords.value.length - 1) {
+      const betAmount = get(betAmountOfExistingBalls)[ball.id] ?? 0;
+      const multiplier = binPayouts[game.rowCount][game.riskLevel][binIndex];
+      const payoutValue = betAmount * multiplier;
+      const profit = payoutValue - betAmount;
+
+      winRecords.update((records) => [
+        ...records,
+        {
+          id: uuidv4(),
+          betAmount,
+          rowCount: game.rowCount,
+          binIndex,
+          payout: {
+            multiplier,
+            value: payoutValue,
+          },
+          profit,
+        },
+      ]);
+      totalProfitHistory.update((history) => {
+        const lastTotalProfit = history.slice(-1)[0];
+        return [...history, lastTotalProfit + profit];
+      });
+      balance.update((balance) => balance + payoutValue);
+    }
+
+    Matter.Composite.remove(engine.world, ball);
+    betAmountOfExistingBalls.update((value) => {
+      const newValue = { ...value };
+      delete newValue[ball.id];
+      return newValue;
+    });
+  }
 </script>
 
 <template>
@@ -251,13 +324,11 @@
             <PhCircleNotch class="size-20 animate-spin text-slate-600" weight="bold" />
           </div> -->
           <canvas id="canvas" width={WIDTH} height={HEIGHT} class="absolute inset-0 h-full w-full" />
-          <!-- <canvas v-init-plinko="game" width={WIDTH} height={HEIGHT} class="absolute inset-0 h-full w-full" /> -->
-        <!-- <canvas use:initPlinko width={WIDTH} height={HEIGHT} class="absolute inset-0 h-full w-full" /> -->
       </div>
       <BinsRow :binsWidthPercentage="binsWidthPercentage" />
     </div>
     <div class="absolute right-[5%] top-1/2 -translate-y-1/2">
-      <!-- <LastWins /> -->
+      <LastWins />
     </div>
   </div>
 </template>
