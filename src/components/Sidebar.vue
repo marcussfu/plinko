@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-5 bg-slate-700 p-3 lg:max-w-80 w-[320px] h-[590px]">
         <div class="flex gap-1 rounded-full bg-slate-900 p-1">
             <button v-for="item in betModes" :key="item.label" :value="item.value"
-                class='flex-1 rounded-full py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50 
+                class='flex-1 rounded-full py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50
                 hover:[&:not(:disabled)]:bg-slate-600 active:[&:not(:disabled)]:bg-slate-500'
                 :class="{ 'bg-slate-600' : betMode === item.value }"
                 @click="betMode = item.value"
@@ -37,7 +37,7 @@
             <div class="flex flex-col gap-1">
                 <div class="relative flex items-center">
                     <label for="autoBetInput" class="text-sm font-medium text-slate-300">Number of Bets</label>
-                    <PhQuestion class="text-slate-300 ml-[6px]" :class="{'cursor-pointer':isMouseEnterNumberBetHint}" weight="bold" 
+                    <PhQuestion class="text-slate-300 ml-[6px]" :class="{'cursor-pointer':isMouseEnterNumberBetHint}" weight="bold"
                         @mouseenter="isMouseEnterNumberBetHint = true" @mouseleave="isMouseEnterNumberBetHint = false" />
                     <div v-if="isMouseEnterNumberBetHint" class="absolute top-[24px] left-[18px] z-30 max-w-lg rounded-md bg-white p-3 text-sm font-medium text-gray-950 drop-shadow-xl">
                         <p>Enter '0' for unlimited bets.</p>
@@ -53,8 +53,8 @@
                         type="number"
                         min="0"
                         inputmode="numeric"
-                        class='w-full rounded-md border-2 border-slate-600 bg-slate-900 py-2 pl-3 pr-8 text-sm text-white 
-                        transition-colors hover:cursor-pointer focus:border-slate-500 focus:outline-none disabled:cursor-not-allowed 
+                        class='w-full rounded-md border-2 border-slate-600 bg-slate-900 py-2 pl-3 pr-8 text-sm text-white
+                        transition-colors hover:cursor-pointer focus:border-slate-500 focus:outline-none disabled:cursor-not-allowed
                         disabled:opacity-50 hover:[&:not(:disabled)]:border-slate-500'
                         :class="{ 'border-red-500 hover:border-red-400 focus:border-red-400':isAutoBetInputNegative }"
                     />
@@ -65,10 +65,10 @@
             </div>
         </div>
 
-        <button 
+        <button
             @click="handleBetClick"
             :disabled="isDropBallDisabled"
-            class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors 
+            class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors
             hover:bg-green-400 active:bg-green-600 disabled:bg-neutral-600 disabled:text-neutral-400'
             :class="{ 'bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600':autoBetInterval !== null }"
         >
@@ -130,8 +130,13 @@ const hasOutstandingBalls = computed(() => {
     return Object.keys(betAmountOfExistingBalls).length > 0;
 });
 
-const autoBetInputValue = computed(() => {
-    return autoBetInterval.value === null ? autoBetInput.value : autoBetsLeft.value ?? 0
+const autoBetInputValue = computed({
+  get() {
+    return autoBetInterval.value === null ? autoBetInput.value : autoBetsLeft.value ?? 0;
+  },
+  set(newValue) {
+    autoBetInput.value = newValue;
+  }
 });
 
 // const handleBetAmountFocusOut: FormEventHandler<HTMLInputElement> = (e) => {
