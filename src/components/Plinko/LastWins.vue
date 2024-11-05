@@ -7,7 +7,7 @@
     class="flex w-[clamp(1.5rem,0.893rem+2.857vw,2rem)] flex-col overflow-hidden rounded-sm text-[clamp(8px,5.568px+0.714vw,10px)] md:rounded-md lg:w-12 lg:text-sm"
     :style="{ aspectRatio: 1/winCount }"
   >
-    <div v-for="item in lastWins" :key="item.binIndex"
+    <div v-for="item in lastWins" :key="item.id"
       class="flex aspect-square items-center justify-center font-bold text-gray-950"
       :style="{ backgroundColor: binColorsByRowCount[game.rowCount].background[item.binIndex] }"
     >
