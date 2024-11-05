@@ -277,38 +277,39 @@
     }
     Composite.add(engine.world, pins.value);
 
-    // const firstPinX = pins.value[0].position.x;
-    // const leftWallAngle = Math.atan2(
-    //   firstPinX - pinsLastRowXCoords.value[0],
-    //   canvas.value!.height - PADDING_TOP - PADDING_BOTTOM,
-    // );
-    // const leftWallX =
-    //   firstPinX - (firstPinX - pinsLastRowXCoords.value[0]) / 2 - pinDistanceX.value * 0.25;
+    // setting wall rectangle
+    const firstPinX = pins.value[0].position.x;
+    const leftWallAngle = Math.atan2(
+      firstPinX - pinsLastRowXCoords.value[0],
+      canvas.value!.height - PADDING_TOP - PADDING_BOTTOM,
+    );
+    const leftWallX =
+      firstPinX - (firstPinX - pinsLastRowXCoords.value[0]) / 2 - pinDistanceX.value * 0.25;
 
-    // const leftWall = Matter.Bodies.rectangle(
-    //   leftWallX,
-    //   canvas.value!.height / 2,
-    //   10,
-    //   canvas.value!.height,
-    //   {
-    //     isStatic: true,
-    //     angle: leftWallAngle,
-    //     render: { visible: false },
-    //   },
-    // );
-    // const rightWall = Matter.Bodies.rectangle(
-    //   canvas.value!.width - leftWallX,
-    //   canvas.value!.height / 2,
-    //   10,
-    //   canvas.value!.height,
-    //   {
-    //     isStatic: true,
-    //     angle: -leftWallAngle,
-    //     render: { visible: false },
-    //   },
-    // );
-    // walls.value.push(leftWall, rightWall);
-    // Composite.add(engine.world, walls.value);
+    const leftWall = Matter.Bodies.rectangle(
+      leftWallX,
+      canvas.value!.height / 2,
+      10,
+      canvas.value!.height,
+      {
+        isStatic: true,
+        angle: leftWallAngle,
+        render: { fillStyle: '#ffffff', visible: false },
+      },
+    );
+    const rightWall = Matter.Bodies.rectangle(
+      canvas.value!.width - leftWallX,
+      canvas.value!.height / 2,
+      10,
+      canvas.value!.height,
+      {
+        isStatic: true,
+        angle: -leftWallAngle,
+        render: { fillStyle: '#ffffff', visible: false },
+      },
+    );
+    walls.value.push(leftWall, rightWall);
+    Composite.add(engine.world, walls.value);
   }
 
   const handleBallEnterBin = (ball: Matter.Body) => {
