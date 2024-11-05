@@ -237,6 +237,7 @@
     if (pins.value.length > 0) {
       Composite.remove(engine.world, pins.value);
       pins.value = [];
+      game.isBallEnterBins = [];
     }
 
     if (pinsLastRowXCoords.value.length > 0) {
@@ -274,6 +275,7 @@
           pinsLastRowXCoords.value.push(colX);
         }
       }
+      game.isBallEnterBins.push(false);
     }
     Composite.add(engine.world, pins.value);
 

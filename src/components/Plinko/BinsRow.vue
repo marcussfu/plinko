@@ -8,6 +8,7 @@
          -->
         <div v-for="(item, index) in binPayouts[game.rowCount][game.riskLevel]" :key="index"
           class="flex min-w-0 flex-1 items-center justify-center rounded-sm text-[clamp(6px,2.784px+0.87vw,8px)] font-bold text-gray-950 shadow-[0_2px_var(--shadow-color)] lg:rounded-md lg:text-[clamp(10px,-16.944px+2.632vw,12px)] lg:shadow-[0_3px_var(--shadow-color)]"
+          :class="{'bounce':game.isBallEnterBins[index]}"
           :style="{ backgroundColor: binColorsByRowCount[game.rowCount].background[index], '--shadow-color': binColorsByRowCount[game.rowCount].shadow[index] }"
         >
           {{item + (item < 100? 'x' : '')}}
@@ -17,15 +18,10 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, onMounted } from 'vue';
+  import { watch } from 'vue';
   import { binColorsByRowCount, binPayouts } from '../../constants/game';
   import { useGameStore } from '@/stores/game';
   const game = useGameStore();
-  // const { riskLevel, rowCount, winRecords } = game;
-
-  // import { plinkoEngine, riskLevel, rowCount, winRecords } from '../../stores/game';
-  // import { isAnimationOn } from '$lib/stores/settings';
-  // import type { Action } from 'svelte/action';
 
   interface Props {
     binsWidthPercentage: number;
@@ -36,49 +32,28 @@
   /**
    * Bounce animations for each bin, which is played when a ball falls into the bin.
    */
-  const binAnimations = ref<Animation[]>([]);
-
-  // onMounted(() -> {
-
-  // });
-
   watch(
     () => game.winRecords,
-    (newVal) => {
-      if (newVal.length) {
-        const lastWinBinIndex = game.winRecords.indexOf(game.winRecords[game.winRecords.length - 1]);
-        playAnimation(lastWinBinIndex);
-      }
-    }
+    (newWinRecords) => {
+      const lastWinBinIndex = newWinRecords[newWinRecords.length - 1].binIndex;
+      // active animation boolean
+      game.setIsBallEnterBins(lastWinBinIndex, true);
+      setTimeout(() => {
+        game.setIsBallEnterBins(lastWinBinIndex, false);
+      }, 300);
+    },
+    { deep: true }
   );
-
-  // const initAnimation: Action<HTMLDivElement> = (node) => {
-  //   const bounceAnimation = node.animate(
-  //     [
-  //       { transform: 'translateY(0)' },
-  //       { transform: 'translateY(30%)' },
-  //       { transform: 'translateY(0)' },
-  //     ],
-  //     {
-  //       duration: 300,
-  //       easing: 'cubic-bezier(0.18, 0.89, 0.32, 1.28)',
-  //     },
-  //   );
-  //   bounceAnimation.pause(); // Don't run the animation immediately
-  //   binAnimations.push(bounceAnimation);
-  // };
-
-  const playAnimation = (binIndex: number) => {
-    // if (!$isAnimationOn) {
-    //   return;
-    // }
-console.log("JJJJJ", binIndex);
-    const animation = binAnimations.value[binIndex];
-
-    // Always reset animation before playing. Safari has a weird behavior where
-    // the animation will not play the second time if it's not cancelled.
-    animation.cancel();
-
-    animation.play();
-  }
 </script>
+
+<style scoped>
+.bounce {
+  animation: bounce 300ms cubic-bezier(0.18, 0.89, 0.32, 1.28)
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(30%); }
+  100% { transform: translateY(0); }
+}
+</style>

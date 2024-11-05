@@ -141,7 +141,7 @@ class PlinkoEngine {
     });
     this.runner = Matter.Runner.create();
 
-    this.placePinsAndWalls();console.log("TTTTT");
+    this.placePinsAndWalls();
 
     this.sensor = Matter.Bodies.rectangle(
       this.canvas.width / 2,

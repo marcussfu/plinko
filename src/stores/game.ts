@@ -61,6 +61,13 @@ export const useGameStore = defineStore('game', () => {
     isDropBall.value = value;
    }
 
+   const isBallEnterBins = ref<boolean[]>([]);
+
+   const setIsBallEnterBins = (index: number, value: boolean) => {
+    if (isBallEnterBins.value.length > 0)
+      isBallEnterBins.value[index] = value;
+   }
+
 /**
  * History of total profits. Should be updated whenever a new win record is pushed
  * to `winRecords` store.
@@ -134,15 +141,17 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
     binColors,
     binProbabilities,
     isDropBall,
+    isBallEnterBins,
     setDropBall,
     setBetAmount,
     setRiskLevel,
     setRowCount,
-    updateBetAmountOfExistingBalls,
+    setIsBallEnterBins,
     initBetAmountOfExistingBalls,
     deleteItemFromBetAmountOfExistingBalls,
     updateBalance,
     updateWinRecords,
-    updateTotalProfitHistory
+    updateTotalProfitHistory,
+    updateBetAmountOfExistingBalls,
    }
 })
