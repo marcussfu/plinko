@@ -5,21 +5,27 @@
   import BinsRow from './BinsRow.vue';
   import LastWins from './LastWins.vue';
   // import PlinkoEngine from './PlinkoEngine';
-  import {
-    RiskLevel,
-    type BetAmountOfExistingBalls,
-    type RowCount,
-    type WinRecord,
-  } from '../../types';
+  // import {
+  //   RiskLevel,
+  //   type BetAmountOfExistingBalls,
+  //   type RowCount,
+  //   type WinRecord,
+  // } from '../../types';
+
+  import type { RowCount } from '../../types';
   import { getRandomBetween } from '../../utils/numbers';
   import { binPayouts } from '../../constants/game';
 
   import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
   import Matter, { type IBodyDefinition } from 'matter-js';
+  import { v4 as uuidv4 } from 'uuid';
+
+  type BallFrictionsByRowCount = {
+    friction: NonNullable<IBodyDefinition['friction']>;
+    frictionAirByRowCount: Record<RowCount, NonNullable<IBodyDefinition['frictionAir']>>;
+  };
 
   const game = useGameStore();
-
-  // const { WIDTH, HEIGHT } = PlinkoEngine;
 
   const WIDTH = 760;
   const HEIGHT = 570;
@@ -73,11 +79,6 @@
     // },
   });
 
-  type BallFrictionsByRowCount = {
-    friction: NonNullable<IBodyDefinition['friction']>;
-    frictionAirByRowCount: Record<RowCount, NonNullable<IBodyDefinition['frictionAir']>>;
-  };
-
   const ballFrictions: BallFrictionsByRowCount = {
     friction: 0.5,
     frictionAirByRowCount: {
@@ -92,7 +93,7 @@
       16: 0.0364,
     },
   };
-  
+
   onMounted(() => {
     // create a renderer
     canvas.value = document.getElementById("canvas") as HTMLCanvasElement;
@@ -209,8 +210,8 @@
     );
     Composite.add(engine.world, ball);
 
-    // game.betAmountOfExistingBalls.update((value) => ({ ...value, [ball.id]: this.betAmount }));
-    // game.balance.update((balance) => balance - this.betAmount);
+    game.updateBetAmountOfExistingBalls(ball.id);
+    game.updateBalance(-game.betAmount);
   }
 
   const updateRowCount = (currentRowCount:RowCount) => {
@@ -229,7 +230,7 @@
         Composite.remove(engine.world, body);
       }
     });
-    // game.betAmountOfExistingBalls.set({});
+    game.initBetAmountOfExistingBalls();
   }
 
   const placePinsAndWalls = () => {
@@ -259,7 +260,6 @@
         const colX = rowPaddingX + ((canvas.value!.width - rowPaddingX * 2) / (3 + row - 1)) * col;
         const pin = Bodies.circle(colX, rowY, pinRadius.value, {
           isStatic: true,
-          label: "Peg",
           render: {
             fillStyle: '#ffffff',
           },
@@ -276,43 +276,73 @@
       }
     }
     Composite.add(engine.world, pins.value);
+
+    // const firstPinX = pins.value[0].position.x;
+    // const leftWallAngle = Math.atan2(
+    //   firstPinX - pinsLastRowXCoords.value[0],
+    //   canvas.value!.height - PADDING_TOP - PADDING_BOTTOM,
+    // );
+    // const leftWallX =
+    //   firstPinX - (firstPinX - pinsLastRowXCoords.value[0]) / 2 - pinDistanceX.value * 0.25;
+
+    // const leftWall = Matter.Bodies.rectangle(
+    //   leftWallX,
+    //   canvas.value!.height / 2,
+    //   10,
+    //   canvas.value!.height,
+    //   {
+    //     isStatic: true,
+    //     angle: leftWallAngle,
+    //     render: { visible: false },
+    //   },
+    // );
+    // const rightWall = Matter.Bodies.rectangle(
+    //   canvas.value!.width - leftWallX,
+    //   canvas.value!.height / 2,
+    //   10,
+    //   canvas.value!.height,
+    //   {
+    //     isStatic: true,
+    //     angle: -leftWallAngle,
+    //     render: { visible: false },
+    //   },
+    // );
+    // walls.value.push(leftWall, rightWall);
+    // Composite.add(engine.world, walls.value);
   }
 
   const handleBallEnterBin = (ball: Matter.Body) => {
-    const binIndex = pinsLastRowXCoords.value.findLastIndex((pinX) => pinX < ball.position.x);
+    let binIndex = -1;
+    for (let i = pinsLastRowXCoords.value.length - 1; i>=0; i--) {
+      if (pinsLastRowXCoords.value[i] < ball.position.x) {
+        binIndex = i;
+        break;
+      }
+    }
+
     if (binIndex !== -1 && binIndex < pinsLastRowXCoords.value.length - 1) {
-      const betAmount = get(betAmountOfExistingBalls)[ball.id] ?? 0;
+      const betAmount = game.betAmountOfExistingBalls[ball.id] ?? 0;
       const multiplier = binPayouts[game.rowCount][game.riskLevel][binIndex];
       const payoutValue = betAmount * multiplier;
       const profit = payoutValue - betAmount;
 
-      winRecords.update((records) => [
-        ...records,
-        {
-          id: uuidv4(),
-          betAmount,
-          rowCount: game.rowCount,
-          binIndex,
-          payout: {
-            multiplier,
-            value: payoutValue,
-          },
-          profit,
+      game.updateWinRecords({
+        id: uuidv4(),
+        betAmount,
+        rowCount: game.rowCount,
+        binIndex,
+        payout: {
+          multiplier,
+          value: payoutValue,
         },
-      ]);
-      totalProfitHistory.update((history) => {
-        const lastTotalProfit = history.slice(-1)[0];
-        return [...history, lastTotalProfit + profit];
+        profit,
       });
-      balance.update((balance) => balance + payoutValue);
+      game.updateTotalProfitHistory(profit);
+      game.updateBalance(payoutValue);
     }
 
-    Matter.Composite.remove(engine.world, ball);
-    betAmountOfExistingBalls.update((value) => {
-      const newValue = { ...value };
-      delete newValue[ball.id];
-      return newValue;
-    });
+    Composite.remove(engine.world, ball);
+    game.deleteItemFromBetAmountOfExistingBalls(ball.id);
   }
 </script>
 

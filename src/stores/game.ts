@@ -22,6 +22,21 @@ export const useGameStore = defineStore('game', () => {
 
    const betAmountOfExistingBalls = ref<BetAmountOfExistingBalls>({});
 
+   const updateBetAmountOfExistingBalls = (ballId:number) => {
+    betAmountOfExistingBalls.value = {...betAmountOfExistingBalls.value, [ballId]: betAmount.value};
+   }
+
+   const initBetAmountOfExistingBalls = () => {
+    betAmountOfExistingBalls.value = {};
+   }
+
+   const deleteItemFromBetAmountOfExistingBalls = (ballId:number) => {
+    // const newValue = {...betAmountOfExistingBalls.value};
+    // delete newValue[ballId];
+    // betAmountOfExistingBalls.value = {...newValue};
+    delete betAmountOfExistingBalls.value[ballId];
+   }
+
    const rowCount = ref<RowCount>(16);
 
    const setRowCount = (value:RowCount) => {
@@ -35,6 +50,10 @@ export const useGameStore = defineStore('game', () => {
    }
 
    const winRecords = ref<WinRecord[]>([]);
+
+   const updateWinRecords = (value:WinRecord) => {
+    winRecords.value.push(value);
+   }
 
    const isDropBall = ref<boolean>(false);
 
@@ -50,6 +69,11 @@ export const useGameStore = defineStore('game', () => {
  */
  const totalProfitHistory = ref<number[]>([0]);
 
+ const updateTotalProfitHistory = (profit:number) => {
+    const lastTotalProfit = totalProfitHistory.value.slice(-1)[0];
+    totalProfitHistory.value = [...totalProfitHistory.value, lastTotalProfit + profit];
+ }
+
 /**
  * Game balance, which is saved to local storage.
  *
@@ -58,6 +82,10 @@ export const useGameStore = defineStore('game', () => {
  * be slow on low-end devices.
  */
  const balance = ref<number>(200);
+
+ const updateBalance = (value:number) => {
+  balance.value += value;
+ }
 
 /**
  * RGB colors for every bin. The length of the array is the number of bins.
@@ -94,21 +122,27 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
   return probabilities;
 });
 
-  return { 
-    plinkoEngine, 
-    betAmount, 
-    betAmountOfExistingBalls, 
-    rowCount, 
-    riskLevel, 
-    winRecords, 
-    totalProfitHistory, 
-    balance, 
-    binColors, 
+  return {
+    plinkoEngine,
+    betAmount,
+    betAmountOfExistingBalls,
+    rowCount,
+    riskLevel,
+    winRecords,
+    totalProfitHistory,
+    balance,
+    binColors,
     binProbabilities,
     isDropBall,
     setDropBall,
     setBetAmount,
     setRiskLevel,
-    setRowCount
+    setRowCount,
+    updateBetAmountOfExistingBalls,
+    initBetAmountOfExistingBalls,
+    deleteItemFromBetAmountOfExistingBalls,
+    updateBalance,
+    updateWinRecords,
+    updateTotalProfitHistory
    }
 })

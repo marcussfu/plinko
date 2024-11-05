@@ -11,7 +11,7 @@
       class="flex aspect-square items-center justify-center font-bold text-gray-950"
       :style="{ backgroundColor: binColorsByRowCount[game.rowCount].background[item.binIndex] }"
     >
-      {{ item.payout.multiplier + item.payout.multiplier < 100 ? '×' : '' }}
+      {{ item.payout.multiplier + (item.payout.multiplier < 100 ? '×' : '') }}
     </div>
   </div>
 </template>
