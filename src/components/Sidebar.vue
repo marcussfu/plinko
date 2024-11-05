@@ -11,9 +11,44 @@
                 {{ item.label }}
             </button>
         </div>
-        <!-- <div class="relative">
+        <div class="relative">
             <label for="betAmount" class="text-sm font-medium text-slate-300">Bet Amount</label>
-        </div> -->
+            <div class="flex">
+              <div class="relative flex-1">
+                <input
+                  id="betAmount"
+                  v-model="currentBetAmount"
+                  on:focusout={handleBetAmountFocusOut}
+                  :disabled="autoBetInterval !== null"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  class='w-full rounded-l-md border-2 border-slate-600 bg-slate-900 py-2 pl-7 pr-2 text-sm text-white transition:}colors hover:cursor-pointer focus:border-slate-500 focus:outline-none disabled:cursor-not-allowed  disabled:opacity-50 hover:[&:not(:disabled)]:border-slate-500'
+                  :class="{'border-red-500 focus:border-red-400 hover:[&:not(:disabled)]:border-red-400':isBetAmountNegative || isBetExceedBalance}"
+                />
+                <div class="absolute left-3 top-2 select-none text-slate-500" aria-hidden>$</div>
+              </div>
+              <button
+                :disabled="autoBetInterval !== null"
+                @click="changeBetAmount(parseFloat((currentBetAmount / 2).toFixed(2)))"
+                class="touch-manipulation bg-slate-600 px-4 font-bold diagonal-fractions text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:[&:not(:disabled)]:bg-slate-500 active:[&:not(:disabled)]:bg-slate-400"
+              >
+                1/2
+              </button>
+              <button
+                :disabled="autoBetInterval !== null"
+                @click="changeBetAmount(parseFloat((currentBetAmount * 2).toFixed(2)))"
+                class="relative touch-manipulation rounded-r-md bg-slate-600 px-4 text-sm font-bold text-white transition-colors after:absolute after:left-0 after:inline-block after:h-1/2 after:w-[2px] after:bg-slate-800 after:content-[''] disabled:cursor-not-allowed disabled:opacity-50 hover:[&:not(:disabled)]:bg-slate-500 active:[&:not(:disabled)]:bg-slate-400"
+              >
+                2×
+              </button>
+            </div>
+            <p v-if="isBetAmountNegative" class="absolute text-xs leading-5 text-red-400">
+              This must be greater than or equal to 0.
+            </p>
+            <p v-else-if="isBetExceedBalance" class="absolute text-xs leading-5 text-red-400">Can't bet more than your balance!</p>
+        </div>
 
         <div class="flex flex-col">
             <label for="riskLevel" class="text-sm font-medium text-slate-300 pb-[2px]">Risk</label>
@@ -85,7 +120,7 @@ import { PhChartLine, PhGearSix, PhInfinity, PhQuestion } from '@phosphor-icons/
 import { useGameStore } from '../stores/game';
 
 const game = useGameStore();
-const { balance, rowCount, riskLevel, betAmount, betAmountOfExistingBalls } = game;
+const { rowCount, riskLevel } = game;
 
 const isMouseEnterNumberBetHint = ref<boolean>(false);
 
@@ -110,12 +145,21 @@ const currentRowCount = ref<RowCount>(rowCount);
 
 const currentRiskLevel = ref<RiskLevel>(riskLevel);
 
+const currentBetAmount = computed({
+  get() {
+    return game.betAmount;
+  },
+  set(newValue) {
+    game.setBetAmount(newValue);
+  }
+});
+
 const isBetAmountNegative = computed(() => {
-    return betAmount < 0;
+    return currentBetAmount.value < 0;
 });
 
 const isBetExceedBalance = computed(() => {
-    return betAmount > balance;
+    return currentBetAmount.value > game.balance;
 });
 
 const isAutoBetInputNegative = computed(() => {
@@ -127,7 +171,7 @@ const isDropBallDisabled = computed(() => {
 });
 
 const hasOutstandingBalls = computed(() => {
-    return Object.keys(betAmountOfExistingBalls).length > 0;
+    return Object.keys(game.betAmountOfExistingBalls).length > 0;
 });
 
 const autoBetInputValue = computed({
@@ -179,14 +223,14 @@ const autoBetDropBall = () => {
     }
 };
 
-const handleAutoBetInputFocusOut = () => {
-    if (isNaN(autoBetInputValue.value)) {
-      autoBetInput.value = -1; // If input field is empty, this forces re-render so its value resets to 0
-      autoBetInput.value = 0;
-    } else {
-      autoBetInput.value = autoBetInputValue.value;
-    }
-};
+// const handleAutoBetInputFocusOut = () => {
+//     if (isNaN(autoBetInputValue.value)) {
+//       autoBetInput.value = -1; // If input field is empty, this forces re-render so its value resets to 0
+//       autoBetInput.value = 0;
+//     } else {
+//       autoBetInput.value = autoBetInputValue.value;
+//     }
+// };
 
 const handleBetClick = () => {
     if (betMode.value === BetMode.MANUAL) {
@@ -217,6 +261,11 @@ const changeRiskLevel = () => {
 
 const changeRowCount = () => {
     game.setRowCount(currentRowCount.value);
+}
+
+const changeBetAmount = (value: number) => {
+  currentBetAmount.value = value;
+  game.setBetAmount(currentBetAmount.value);
 }
 </script>
 
