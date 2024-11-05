@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia'
-import PlinkoEngine from '../components/Plinko/PlinkoEngine';
+// import PlinkoEngine from '../components/Plinko/PlinkoEngine';
 import { binColor } from '../constants/game';
 import {
   RiskLevel,
@@ -12,7 +12,7 @@ import { interpolateRgbColors } from '../utils/colors';
 import { countValueOccurrences } from '../utils/numbers';
 
 export const useGameStore = defineStore('game', () => {
-   const plinkoEngine  = ref<PlinkoEngine | null>(null);
+  //  const plinkoEngine  = ref<PlinkoEngine | null>(null);
 
    const betAmount = ref<number>(1);
 
@@ -130,7 +130,7 @@ const binProbabilities = computed<{ [binIndex: number]: number }>(() => {
 });
 
   return {
-    plinkoEngine,
+    // plinkoEngine,
     betAmount,
     betAmountOfExistingBalls,
     rowCount,

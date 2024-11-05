@@ -1,21 +1,11 @@
 <script setup lang="ts">
   import { useGameStore } from '../../stores/game';
-  import { PhCircleNotch } from '@phosphor-icons/vue';
-  // import type { Action } from 'svelte/action';
+  // import { PhCircleNotch } from '@phosphor-icons/vue';
   import BinsRow from './BinsRow.vue';
   import LastWins from './LastWins.vue';
-  // import PlinkoEngine from './PlinkoEngine';
-  // import {
-  //   RiskLevel,
-  //   type BetAmountOfExistingBalls,
-  //   type RowCount,
-  //   type WinRecord,
-  // } from '../../types';
-
   import type { RowCount } from '../../types';
   import { getRandomBetween } from '../../utils/numbers';
   import { binPayouts } from '../../constants/game';
-
   import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
   import Matter, { type IBodyDefinition } from 'matter-js';
   import { v4 as uuidv4 } from 'uuid';
