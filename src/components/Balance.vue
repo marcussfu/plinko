@@ -11,7 +11,7 @@
           @click="isShowAddMoney = true">
             Add
         </div>
-        <div v-if="isShowAddMoney" class="absolute top-[68px] z-30 max-w-lg space-y-2 rounded-md bg-slate-600 p-3">
+        <div v-if="isShowAddMoney" ref="target" class="absolute top-[68px] z-30 max-w-lg space-y-2 rounded-md bg-slate-600 p-3">
           <p class="text-sm font-medium text-gray-200">Add money</p>
           <div class="flex gap-2">
             <button v-for="amount in addMoneyAmounts" :key="amount"
@@ -28,8 +28,10 @@
 <script setup lang="ts">
   import { ref, computed } from 'vue';
   import { useGameStore } from '@/stores/game';
+  import { onClickOutside } from '@vueuse/core';
 
   const isShowAddMoney = ref<boolean>(false);
+  const target = ref(null);
   const game = useGameStore();
   const addMoneyAmounts = [100, 500, 1000];
 
@@ -39,5 +41,12 @@
       maximumFractionDigits: 2,
     });
   });
+
+  onClickOutside(
+    target,
+    () => {
+      isShowAddMoney.value = false;
+    }
+  );
 
 </script>
