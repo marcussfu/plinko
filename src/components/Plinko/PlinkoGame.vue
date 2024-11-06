@@ -272,11 +272,12 @@
     // setting wall rectangle
     const firstPinX = pins.value[0].position.x;
     const leftWallAngle = Math.atan2(
-      firstPinX - pinsLastRowXCoords.value[0],
+      //firstPinX - pinsLastRowXCoords.value[0],
+      0,
       canvas.value!.height - PADDING_TOP - PADDING_BOTTOM,
     );
-    const leftWallX =
-      firstPinX - (firstPinX - pinsLastRowXCoords.value[0]) / 2 - pinDistanceX.value * 0.25;
+    // const leftWallX = firstPinX - (firstPinX - pinsLastRowXCoords.value[0]) / 2 - pinDistanceX.value * 0.25;
+    const leftWallX = pinsLastRowXCoords.value[0] - pinDistanceX.value * 0.5;
 
     const leftWall = Matter.Bodies.rectangle(
       leftWallX,
