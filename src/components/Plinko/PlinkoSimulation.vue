@@ -234,6 +234,7 @@
       Composite.remove(engine.world, pins.value);
       pins.value = [];
       game.isBallEnterBins = [];
+      simulation.outputs = {};
     }
 
     if (pinsLastRowXCoords.value.length > 0) {
@@ -272,7 +273,9 @@
         }
       }
       game.isBallEnterBins.push(false);
+      simulation.outputs[row] = [];
     }
+    simulation.outputs[game.rowCount] = [];
     Composite.add(engine.world, pins.value);
 
     // setting wall rectangle

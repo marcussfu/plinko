@@ -4,25 +4,7 @@ import { defineStore } from 'pinia';
 export const useSimulationStore = defineStore('simulation', () => {
   const isSimulationing = ref<boolean>(true);
 
-  const outputs = ref<{[key: number]: number[]}>({
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      7: [],
-      8: [],
-      9: [],
-      10: [],
-      11: [],
-      12: [],
-      13: [],
-      14: [],
-      15: [],
-      16: []
-  });
+  const outputs = ref<{[key: number]: number[]}>({});
 
   const setOutputs = (index: number, id: number) => {
     outputs.value[index].push(startXDatas.value[id]);
