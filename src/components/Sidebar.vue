@@ -11,7 +11,7 @@
                 {{ item.label }}
             </button>
         </div>
-        <div class="relative">
+        <div v-if="!simulation.isSimulationing" class="relative">
             <label for="betAmount" class="text-sm font-medium text-slate-300">Bet Amount</label>
             <div class="flex">
               <div class="relative flex-1">
@@ -50,7 +50,7 @@
             <p v-else-if="isBetExceedBalance" class="absolute text-xs leading-5 text-red-400">Can't bet more than your balance!</p>
         </div>
 
-        <div class="flex flex-col">
+        <div v-if="!simulation.isSimulationing" class="flex flex-col">
             <label for="riskLevel" class="text-sm font-medium text-slate-300 pb-[2px]">Risk</label>
             <select id="riskLevel" v-model="currentRiskLevel" :disabled="hasOutstandingBalls || autoBetInterval !== null" @change="changeRiskLevel">
                 <option v-for="item in riskLevels" :key="item.label" :value="item.value">
@@ -109,6 +109,15 @@
         >
             {{ betMode === BetMode.MANUAL? 'Drop Ball': autoBetInterval === null? 'Start Autobet': 'Stop Autobet' }}
         </button>
+
+        <button
+            @click="simulation.exportToJsonFile"
+            :disabled="hasOutstandingBalls || autoBetInterval !== null"
+            class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors
+            hover:bg-green-400 active:bg-green-600 disabled:bg-neutral-600 disabled:text-neutral-400'
+        >
+            {{ 'Export to JSON' }}
+        </button>
     </div>
 </template>
 
@@ -118,8 +127,11 @@ import { autoBetIntervalMs, rowCountOptions } from '../constants/game';
 import { BetMode, RiskLevel, type RowCount } from '../types';
 import { PhChartLine, PhGearSix, PhInfinity, PhQuestion } from '@phosphor-icons/vue';
 import { useGameStore } from '../stores/game';
+import { useSimulationStore } from '../stores/simulation';
 
 const game = useGameStore();
+const simulation = useSimulationStore();
+
 const { rowCount, riskLevel } = game;
 
 const isMouseEnterNumberBetHint = ref<boolean>(false);

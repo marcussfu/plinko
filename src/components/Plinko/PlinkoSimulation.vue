@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useGameStore } from '../../stores/game';
-  // import { PhCircleNotch } from '@phosphor-icons/vue';
+  import { useSimulationStore } from '../../stores/simulation';
+
   import BinsRow from './BinsRow.vue';
   import LastWins from './LastWins.vue';
   import type { RowCount } from '../../types';
@@ -16,6 +17,7 @@
   };
 
   const game = useGameStore();
+  const simulation = useSimulationStore();
 
   const WIDTH = 760;
   const HEIGHT = 570;
@@ -167,6 +169,9 @@
     () => game.isDropBall,
     (newVal) => {
       if (newVal) {
+        // remove before simulationStartXDatas
+        // simulation.startXDatas.
+
         dropABall();
         game.setDropBall(false);  // Reset `isDropBall` after handling
       }
@@ -198,6 +203,7 @@
         },
       }
     );
+    simulation.setStartXDatas(ball.id, ball.position.x);
     Composite.add(engine.world, ball);
 
     game.updateBetAmountOfExistingBalls(ball.id);
@@ -313,6 +319,7 @@
         break;
       }
     }
+    simulation.setOutputs(binIndex, ball.id);
 
     if (binIndex !== -1 && binIndex < pinsLastRowXCoords.value.length - 1) {
       const betAmount = game.betAmountOfExistingBalls[ball.id] ?? 0;
@@ -352,7 +359,11 @@
       <BinsRow :binsWidthPercentage="binsWidthPercentage" />
     </div>
     <div class="absolute right-[5%] top-1/2 -translate-y-1/2">
-      <LastWins />
+      <div v-for="(value, key) in simulation.outputs" :key="key"
+        class="text-[white] text-[10px] border-[white] border-[2px] w-[60px] h-[25px] flex items-center justify-center">
+        {{key + ':' + value.length}}
+      </div>
+      <!-- <LastWins /> -->
     </div>
   </div>
 </template>

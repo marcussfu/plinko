@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import Plinko from './components/Plinko/PlinkoGame.vue';
+import PlinkoSimulation from './components/Plinko/PlinkoSimulation.vue';
 import Sidebar from './components/Sidebar.vue';
 import Balance from './components/Balance.vue';
 import logo from './assets/logo.svg';
+
+import { useSimulationStore } from './stores/simulation';
+
+const simulation = useSimulationStore();
 </script>
 
 <template>
@@ -10,7 +15,7 @@ import logo from './assets/logo.svg';
     <nav class="sticky top-0 z-10 w-full bg-gray-700 px-5 drop-shadow-lg">
       <div class="mx-auto flex h-14 max-w-7xl items-center justify-between">
         <img :src="logo" alt="logo" class="h-6 sm:h-7" />
-        <div class="mx-auto relative">
+        <div v-if="!simulation.isSimulationing" class="mx-auto relative">
           <Balance />
         </div>
       </div>
@@ -21,7 +26,12 @@ import logo from './assets/logo.svg';
         <div class="flex flex-col-reverse overflow-hidden rounded-lg lg:w-full lg:flex-row">
           <Sidebar />
           <div class="flex-1">
-            <Plinko />
+            <template v-if="simulation.isSimulationing">
+              <PlinkoSimulation />
+            </template>
+            <template v-else>
+              <Plinko />
+            </template>
           </div>
         </div>
       </div>
