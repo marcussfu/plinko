@@ -119,7 +119,7 @@
             {{ 'Export to JSON' }}
         </button>
 
-        <div class="mt-auto pt-5">
+        <div v-if="env === 'Dev'" class="mt-auto pt-5">
           <div class="flex items-center gap-4 border-t border-slate-600 pt-3">
             <div class="flex item-center">
               <div class="text-[16px] text-[white] pr-[2px]">{{ 'Open Simulation' }}</div>
@@ -143,6 +143,8 @@ const game = useGameStore();
 const simulation = useSimulationStore();
 
 const { rowCount, riskLevel } = game;
+
+const env = ref<string>(import.meta.env.VITE_ENV);
 
 const isMouseEnterNumberBetHint = ref<boolean>(false);
 

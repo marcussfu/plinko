@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useSimulationStore = defineStore('simulation', () => {
-  const isSimulationing = ref<boolean>(true);
+  const isSimulationing = ref<boolean>(false);
 
   const outputs = ref<{[key: number]: number[]}>({});
 

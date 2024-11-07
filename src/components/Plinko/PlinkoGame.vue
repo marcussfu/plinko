@@ -9,6 +9,7 @@
   import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
   import Matter, { type IBodyDefinition } from 'matter-js';
   import { v4 as uuidv4 } from 'uuid';
+  import axios from 'axios';
 
   type BallFrictionsByRowCount = {
     friction: NonNullable<IBodyDefinition['friction']>;
@@ -167,22 +168,30 @@
     () => game.isDropBall,
     (newVal) => {
       if (newVal) {
-        dropABall();
-        game.setDropBall(false);  // Reset `isDropBall` after handling
+        callToDrop();
       }
     }
   );
 
-  const dropABall = () => {
-    const ballOffsetRangeX = pinDistanceX.value;// * 0.8;
+  const callToDrop = async () => {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/game`, {
+      data: 1,
+    });
+    dropABall(response.data.point);
+    game.setDropBall(false);  // Reset `isDropBall` after handling
+  };
+
+  const dropABall = (point: number) => {
+    // const ballOffsetRangeX = pinDistanceX.value;// * 0.8;
     const ballRadius = pinRadius.value * 2;
     const { friction, frictionAirByRowCount } = ballFrictions;
 
     const ball = Bodies.circle(
-      getRandomBetween(
-        canvas.value!.width / 2 - ballOffsetRangeX,
-        canvas.value!.width / 2 + ballOffsetRangeX,
-      ),
+      // getRandomBetween(
+      //   canvas.value!.width / 2 - ballOffsetRangeX,
+      //   canvas.value!.width / 2 + ballOffsetRangeX,
+      // ),
+      point,
       0,
       ballRadius,
       {
