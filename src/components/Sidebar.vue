@@ -113,7 +113,6 @@
         <button
             v-if="simulation.isSimulationing"
             @click="simulation.exportToJsonFile"
-            :disabled="hasOutstandingBalls || autoBetInterval !== null"
             class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors
             hover:bg-green-400 active:bg-green-600 disabled:bg-neutral-600 disabled:text-neutral-400'
         >
