@@ -32,8 +32,17 @@ npm run dev
 npm run build
 ```
 
+### For deploy
+
+```sh
+npm run deploy
+```
+
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh
 npm run lint
 ```
+
+backend node js project url:
+https://github.com/marcussfu/plinko_nodeJS_TS.git
