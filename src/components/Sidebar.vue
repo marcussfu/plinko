@@ -111,6 +111,7 @@
         </button>
 
         <button
+            v-if="simulation.isSimulationing"
             @click="simulation.exportToJsonFile"
             :disabled="hasOutstandingBalls || autoBetInterval !== null"
             class='touch-manipulation rounded-md bg-green-500 py-3 font-semibold text-slate-900 transition-colors
@@ -118,6 +119,15 @@
         >
             {{ 'Export to JSON' }}
         </button>
+
+        <div class="mt-auto pt-5">
+          <div class="flex items-center gap-4 border-t border-slate-600 pt-3">
+            <div class="flex item-center">
+              <div class="text-[16px] text-[white] pr-[2px]">{{ 'Open Simulation' }}</div>
+              <Switch v-model="simulation.isSimulationing" />
+            </div>
+          </div>
+        </div>
     </div>
 </template>
 
@@ -128,6 +138,7 @@ import { BetMode, RiskLevel, type RowCount } from '../types';
 import { PhChartLine, PhGearSix, PhInfinity, PhQuestion } from '@phosphor-icons/vue';
 import { useGameStore } from '../stores/game';
 import { useSimulationStore } from '../stores/simulation';
+import Switch from '../components/UI/Switch.vue';
 
 const game = useGameStore();
 const simulation = useSimulationStore();

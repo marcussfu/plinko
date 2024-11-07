@@ -21,7 +21,9 @@
   import { watch } from 'vue';
   import { binColorsByRowCount, binPayouts } from '../../constants/game';
   import { useGameStore } from '@/stores/game';
+  import { useSimulationStore } from '@/stores/simulation';
   const game = useGameStore();
+  const simulation = useSimulationStore();
 
   interface Props {
     binsWidthPercentage: number;
@@ -35,6 +37,7 @@
   watch(
     () => game.winRecords,
     (newWinRecords) => {
+      if (simulation.isSimulationing) return;
       const lastWinBinIndex = newWinRecords[newWinRecords.length - 1].binIndex;
       // active animation boolean
       game.setIsBallEnterBins(lastWinBinIndex, true);
