@@ -175,7 +175,7 @@
 
   const callToDrop = async () => {
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/game`, {
-      data: 1,
+      rowCount: game.rowCount,
     });
     dropABall(response.data.point);
     game.setDropBall(false);  // Reset `isDropBall` after handling

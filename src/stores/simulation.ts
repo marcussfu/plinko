@@ -28,7 +28,7 @@ export const useSimulationStore = defineStore('simulation', () => {
     const downloadLink = document.createElement('a');
     // export to json file
     downloadLink.href = downloadUrl;
-    downloadLink.download = 'outputs.json';
+    downloadLink.download = 'outputs' + (Object.keys(outputs.value).length-1) + '.json';
     downloadLink.click();
 
     URL.revokeObjectURL(downloadUrl); //Clean up
