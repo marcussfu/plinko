@@ -315,14 +315,15 @@
   }
 
   const handleBallEnterBin = (ball: Matter.Body) => {
-    let binIndex = -1;
-    for (let i = pinsLastRowXCoords.value.length - 1; i>=0; i--) {
-      if (pinsLastRowXCoords.value[i] < ball.position.x) {
-        binIndex = i;
-        break;
-      }
-    }
+    // let binIndex = -1;
+    // for (let i = pinsLastRowXCoords.value.length - 1; i>=0; i--) {
+    //   if (pinsLastRowXCoords.value[i] < ball.position.x) {
+    //     binIndex = i;
+    //     break;
+    //   }
+    // }
 
+    const binIndex = pinsLastRowXCoords.value.findLastIndex((pinX) => pinX < ball.position.x);
 
     if (binIndex !== -1 && binIndex < pinsLastRowXCoords.value.length - 1) {
       const betAmount = game.betAmountOfExistingBalls[ball.id] ?? 0;
@@ -331,6 +332,8 @@
       const profit = payoutValue - betAmount;
 
       simulation.setOutputs(binIndex, ball.id);
+
+      console.log("result", binIndex);
 
       game.updateWinRecords({
         id: uuidv4(),
