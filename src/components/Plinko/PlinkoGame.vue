@@ -73,16 +73,27 @@
   const ballFrictions: BallFrictionsByRowCount = {
     friction: 0.3,// range (0, 1) 0.5
     frictionAirByRowCount: {// faster a body slows when moving through space, 0 means never slow, default 0.01
-      8: 0.0395,
-      9: 0.041,
-      10: 0.038,
-      11: 0.0355,
-      12: 0.0414,
-      13: 0.0437,
-      14: 0.0401,
-      15: 0.0418,
+      8: 0.02,//0.0395,
+      9: 0.022,//0.041,
+      10: 0.02,//0.038,
+      11: 0.02,//0.0355,
+      12: 0.022,//0.0414,
+      13: 0.02,//0.0437,
+      14: 0.025,//0.0401,
+      15: 0.026,//0.0418,
       16: 0.025,
     },
+    // frictionAirByRowCount: {// faster a body slows when moving through space, 0 means never slow, default 0.01
+    //   8: 0.0395,
+    //   9: 0.041,
+    //   10: 0.038,
+    //   11: 0.0355,
+    //   12: 0.0414,
+    //   13: 0.0437,
+    //   14: 0.0401,
+    //   15: 0.0418,
+    //   16: 0.025,
+    // },
   };
 
   onMounted(() => {
